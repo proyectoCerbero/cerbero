@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>indice</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <div class="contenedor">
+
+        <aside class="sidebar">
+
+            <div>
+
+                <h1>Cerbero</h1>
+                <p>Sistema de Gestión de Residuos Urbanos</p>
+
+                <nav>
+
+                    <a href="#">Dashboard</a>
+                    <a href="#">Usuarios</a>
+                    <a href="#">Contenedores</a>
+                    <a href="#">Camiones</a>
+                    <a href="#">Incidencias</a>
+                    <a href="#">Instalaciones</a>
+                    <a href="#">Rutas</a>
+                    <a href="#">Reportes</a>
+                    <a href="#">Configuración</a>
+
+                </nav>
+
+            </div>
+
+            <div class="empresa">
+
+                <p>Empresa</p>
+                <h2>Cerbero S.A.S.</h2>
+
+            </div>
+
+        </aside>
+
+        <main class="contenido">
+
+            <header class="cabecera-principal">
+
+                <div class="titulo-principal">
+
+                    <h1>Panel Principal</h1>
+                    <p>Gestión ecológica y monitoreo inteligente de residuos urbanos.</p>
+
+                </div>
+
+                <div class="header-actions">
+
+                    <div class="role-selector">
+                        <label for="roleSelector">Vista de ejemplo</label>
+                        <select id="roleSelector">
+                            <option value="guest">Sin sesión</option>
+                            <option value="vecino">Vecino</option>
+                            <option value="cuadrilla">Cuadrilla</option>
+                            <option value="operario">Operario de instalación</option>
+                            <option value="admin">Administrador municipal</option>
+                        </select>
+                    </div>
+
+                    <div id="userPanel" class="user-panel"></div>
+
+                </div>
+
+            </header>
+
+            <section id="roleBanner" class="role-banner"></section>
+
+            <section id="roleQuickActions" class="quick-actions"></section>
+
+            <section class="estadisticas">
+
+                <div class="card">
+                    <h3>Incidencias Abiertas</h3>
+                    <span>34</span>
+                </div>
+
+                <div class="card">
+                    <h3>Contenedores Activos</h3>
+                    <span>1245</span>
+                </div>
+
+                <div class="card">
+                    <h3>Camiones Operativos</h3>
+                    <span>18</span>
+                </div>
+
+                <div class="card">
+                    <h3>Toneladas Recolectadas</h3>
+                    <span>245T</span>
+                </div>
+
+            </section>
+
+            <section class="principal">
+
+                <div class="mapa">
+
+                    <h2>Mapa Interactivo</h2>
+
+                    <div class="zonaMapa">
+
+                        <div class="pin verde"></div>
+                        <div class="pin amarillo"></div>
+                        <div class="pin rojo"></div>
+                        <div class="pin verde segundo"></div>
+
+                    </div>
+
+                </div>
+
+                <div class="actividad">
+
+                    <h2>Actividad Reciente</h2>
+
+                    <ul>
+
+                        <li>Contenedor desbordado en Zona Centro</li>
+                        <li>Camión #14 asignado a Ruta Norte</li>
+                        <li>Incidencia resuelta en Parque Rodó</li>
+                        <li>Nuevo usuario registrado</li>
+
+                    </ul>
+
+                </div>
+
+            </section>
+
+            <section class="tablas">
+
+                <div class="tabla">
+
+                    <div class="titulo">
+
+                        <h2>Contenedores</h2>
+                        <button>Ver Todos</button>
+
+                    </div>
+
+                    <table>
+
+                        <tr>
+
+                            <th>ID</th>
+                            <th>Zona</th>
+                            <th>Estado</th>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>CTR-102</td>
+                            <td>Centro</td>
+                            <td>Funcional</td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>CTR-201</td>
+                            <td>Cordón</td>
+                            <td>Desbordado</td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>CTR-315</td>
+                            <td>Pocitos</td>
+                            <td>En reparación</td>
+
+                        </tr>
+
+                    </table>
+
+                </div>
+
+                <div class="tabla">
+
+                    <div class="titulo">
+
+                        <h2>Flota</h2>
+                        <button>Gestionar</button>
+
+                    </div>
+
+                    <table>
+
+                        <tr>
+
+                            <th>Camión</th>
+                            <th>Estado</th>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>Camión #14</td>
+                            <td>Operativo</td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>Camión #08</td>
+                            <td>Mantenimiento</td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>Camión #21</td>
+                            <td>Ruta Norte</td>
+
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <script>
+        const roles = {
+            guest: {
+                name: 'Visitante',
+                rol: 'Sin registro',
+                initials: '?',
+                isLogged: false,
+                className: 'role-guest',
+                pill: 'Acceso público',
+                title: 'Tu barrio también puede participar',
+                subtitle: 'Registrate para reportar problemas, ver alertas y recibir novedades de tu zona.',
+                highlights: ['Reporta residuos o fallas', 'Recibe recomendaciones de limpieza', 'Mantén tu barrio informado'],
+                actions: [
+                    { title: 'Iniciar sesión', desc: 'Ingresa a tu cuenta', href: 'login.html?mode=login', type: 'primary' },
+                    { title: 'Registrarme', desc: 'Crea tu acceso', href: 'login.html?mode=register', type: 'secondary' },
+                    { title: 'Ver servicios', desc: 'Conocé cómo funciona', href: '#', type: 'outline' }
+                ]
+            },
+            vecino: {
+                name: 'Lucía Pérez',
+                rol: 'Vecino',
+                initials: 'LP',
+                isLogged: true,
+                className: 'role-vecino',
+                pill: 'Comunidad',
+                title: 'Tu vecino ayuda a mantener el barrio limpio',
+                subtitle: 'Podés reportar incidencias, ver estados de contenedores y seguir novedades del área.',
+                highlights: ['Reporta situaciones urgentes', 'Consulta el estado de tu zona', 'Recibí alertas locales'],
+                actions: [
+                    { title: 'Reportar problema', desc: 'Enviar nueva incidencia', href: '#', type: 'primary' },
+                    { title: 'Ver mi zona', desc: 'Consultar contenedores', href: '#', type: 'secondary' },
+                    { title: 'Ver historial', desc: 'Revisá tus reportes', href: '#', type: 'outline' }
+                ]
+            },
+            cuadrilla: {
+                name: 'Martín Ruiz',
+                rol: 'Cuadrilla',
+                initials: 'MR',
+                isLogged: true,
+                className: 'role-cuadrilla',
+                pill: 'Operación',
+                title: 'Coordinación de recorridos diaria',
+                subtitle: 'El equipo puede ver tareas asignadas, actualizar estados y priorizar rutas.',
+                highlights: ['Gestioná recorridos del día', 'Actualizá estado de limpieza', 'Priorizá zonas con más incidencias'],
+                actions: [
+                    { title: 'Ver recorrido', desc: 'Abrir ruta asignada', href: '#', type: 'primary' },
+                    { title: 'Actualizar estado', desc: 'Marcar tarea completada', href: '#', type: 'secondary' },
+                    { title: 'Alertas', desc: 'Ver incidencias críticas', href: '#', type: 'outline' }
+                ]
+            },
+            operario: {
+                name: 'Andrés López',
+                rol: 'Operario de instalación',
+                initials: 'AL',
+                isLogged: true,
+                className: 'role-operario',
+                pill: 'Instalaciones',
+                title: 'Monitoreo de instalaciones y equipos',
+                subtitle: 'Podés revisar el estado de las instalaciones, coordinar mantenimiento y responder alertas.',
+                highlights: ['Controlá equipos activos', 'Recibí notificaciones de fallas', 'Mantené la red operativa'],
+                actions: [
+                    { title: 'Monitorear', desc: 'Ver estado de instalaciones', href: '#', type: 'primary' },
+                    { title: 'Mantenimiento', desc: 'Gestionar tareas', href: '#', type: 'secondary' },
+                    { title: 'Historial', desc: 'Consultar registros', href: '#', type: 'outline' }
+                ]
+            },
+            admin: {
+                name: 'Marina Costa',
+                rol: 'Administrador municipal',
+                initials: 'MC',
+                isLogged: true,
+                className: 'role-admin',
+                pill: 'Gestión municipal',
+                title: 'Supervisión integral del sistema',
+                subtitle: 'Desde acá podés ver el estado general, priorizar recursos y analizar reportes.',
+                highlights: ['Seguimiento de la operación completa', 'Asignación de recursos', 'Reportes y estadísticas'],
+                actions: [
+                    { title: 'Supervisar', desc: 'Ver incidencias globales', href: '#', type: 'primary' },
+                    { title: 'Gestionar rutas', desc: 'Modificar planes diarios', href: '#', type: 'secondary' },
+                    { title: 'Reportes', desc: 'Analizar desempeño', href: '#', type: 'outline' }
+                ]
+            }
+        };
+
+        function logout() {
+            localStorage.removeItem('cerberoUser');
+            window.location.href = 'index.html';
+        }
+
+        function renderRole(role, userData = null) {
+            const config = roles[role];
+            const userPanel = document.getElementById('userPanel');
+            const roleBanner = document.getElementById('roleBanner');
+            const roleQuickActions = document.getElementById('roleQuickActions');
+
+            const displayName = userData ? `${userData.nombre} ${userData.apellido}` : config.name;
+            const displayInitials = userData ? `${(userData.nombre || '').charAt(0)}${(userData.apellido || '').charAt(0)}` : config.initials;
+            const displayRole = userData ? 'Vecino' : config.rol;
+
+            userPanel.innerHTML = `
+                <div class="avatar">${displayInitials.toUpperCase()}</div>
+                <div class="user-details">
+                    <strong>${displayName}</strong>
+                    <p>${displayRole}</p>
+                </div>
+                ${config.isLogged ? '<div class="auth-actions"><button class="ghost-btn" type="button">Nueva incidencia</button><button class="ghost-btn logout-btn" type="button" onclick="logout()">Cerrar sesión</button></div>' : '<div class="auth-actions"><a class="auth-btn" href="login.html?mode=login">Iniciar sesión</a><a class="auth-btn secondary" href="login.html?mode=register">Registrarse</a></div>'}
+            `;
+
+            roleBanner.className = `role-banner ${config.className}`;
+            roleBanner.innerHTML = `
+                <div>
+                    <span class="pill">${config.pill}</span>
+                    <h2>${config.title}</h2>
+                    <p>${config.subtitle}</p>
+                </div>
+                <ul>
+                    ${config.highlights.map(item => `<li>${item}</li>`).join('')}
+                </ul>
+            `;
+
+            roleQuickActions.innerHTML = config.actions.map(action => `
+                <a class="quick-card ${action.type}" href="${action.href}">
+                    <strong>${action.title}</strong>
+                    <span>${action.desc}</span>
+                </a>
+            `).join('');
+        }
+
+        document.getElementById('roleSelector').addEventListener('change', (event) => {
+            renderRole(event.target.value);
+        });
+
+        const savedUser = JSON.parse(localStorage.getItem('cerberoUser') || 'null');
+        if (savedUser) {
+            renderRole('vecino', savedUser);
+            document.getElementById('roleSelector').value = 'vecino';
+        } else {
+            renderRole('guest');
+        }
+    </script>
+
+</body>
+
+</html>
