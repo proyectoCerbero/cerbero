@@ -21,7 +21,9 @@ class UserModel
 
     public function findByEmail(string $email): ?array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM usuarios WHERE email = ? LIMIT 1');
+        $stmt = $this->pdo->prepare(
+            'SELECT u.ci AS id, u.nombre, u.apellido, u.email, u.contraseña_hash AS password, u.fecha_registro, u.estado, u.id_rol, u.id_cuadrilla, r.nombre AS role FROM usuario u LEFT JOIN rol r ON u.id_rol = r.id_rol WHERE u.email = ? LIMIT 1'
+        );
         $stmt->execute([strtolower(trim($email))]);
         $user = $stmt->fetch();
 
@@ -32,27 +34,29 @@ class UserModel
     {
         $hashedPassword = password_hash($data['password'] ?? '', PASSWORD_BCRYPT);
         $stmt = $this->pdo->prepare(
-            'INSERT INTO usuarios (nombre, apellido, cedula, email, password, role) VALUES (?, ?, ?, ?, ?, ?)'
+            'INSERT INTO usuario (ci, nombre, apellido, email, contraseña_hash, fecha_registro, estado, id_rol, id_cuadrilla) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?)'
         );
 
+        $estado = $data['estado'] ?? 'activo';
+        $idRol = $data['id_rol'] ?? null;
+        $idCuadrilla = $data['id_cuadrilla'] ?? null;
+
         $stmt->execute([
+            trim($data['cedula'] ?? ''),
             trim($data['nombre'] ?? ''),
             trim($data['apellido'] ?? ''),
-            trim($data['cedula'] ?? ''),
             strtolower(trim($data['email'] ?? '')),
             $hashedPassword,
-            $data['role'] ?? 'vecino'
+            $estado,
+            $idRol,
+            $idCuadrilla
         ]);
 
-        $id = (int) $this->pdo->lastInsertId();
-
         return [
-            'id' => $id,
+            'id' => trim($data['cedula'] ?? ''),
             'nombre' => trim($data['nombre'] ?? ''),
             'apellido' => trim($data['apellido'] ?? ''),
-            'cedula' => trim($data['cedula'] ?? ''),
             'email' => strtolower(trim($data['email'] ?? '')),
-            'password' => $hashedPassword,
             'role' => $data['role'] ?? 'vecino'
         ];
     }

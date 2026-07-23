@@ -13,6 +13,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
     };
 
+    const API_BASE_URL = 'http://localhost/proyecto/backend/api/auth.php';
+
+    const fetchJson = async (url, init) => {
+        console.debug('auth fetch', url, init);
+        const response = await fetch(url, init);
+        const text = await response.text();
+        if (!response.ok) {
+            console.error('auth response error', response.status, text);
+            throw new Error(`Servidor respondió ${response.status}: ${text}`);
+        }
+        try {
+            return JSON.parse(text);
+        } catch (error) {
+            console.error('auth JSON parse error', text);
+            throw new Error(`Respuesta no válida del servidor (${response.status}): ${text}`);
+        }
+    };
+
     const submitLogin = async (attempt = 1) => {
         if (!loginForm || loginSubmitting) return;
 
@@ -43,13 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
         statusBox.style.color = '#666';
 
         try {
-            const response = await fetch('../backend/api/auth.php?action=login', {
+            const result = await fetchJson(`${API_BASE_URL}?action=login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
-            const result = await response.json();
             statusBox.textContent = result.message || 'Ocurrió un error.';
             statusBox.style.color = result.success ? 'green' : 'crimson';
 
@@ -59,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = 'index.html';
             }
         } catch (error) {
-            statusBox.textContent = 'No se pudo conectar con el servidor.';
+            statusBox.textContent = `No se pudo conectar con el servidor. ${error.message}`;
             statusBox.style.color = 'crimson';
         } finally {
             loginSubmitting = false;
@@ -97,13 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
         statusBox.style.color = '#666';
 
         try {
-            const response = await fetch('../backend/api/auth.php?action=register', {
+            const result = await fetchJson(`${API_BASE_URL}?action=register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
-            const result = await response.json();
             statusBox.textContent = result.message || 'Ocurrió un error.';
             statusBox.style.color = result.success ? 'green' : 'crimson';
 
@@ -113,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = 'index.html';
             }
         } catch (error) {
-            statusBox.textContent = 'No se pudo conectar con el servidor.';
+            statusBox.textContent = `No se pudo conectar con el servidor. ${error.message}`;
             statusBox.style.color = 'crimson';
         } finally {
             registerSubmitting = false;
