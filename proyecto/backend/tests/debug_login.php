@@ -6,10 +6,11 @@ $config = require __DIR__ . '/../config/database.php';
 $model = new UserModel($config);
 
 $email = 'debug_' . time() . '@example.com';
+$cedula = 'CI' . time();
 $user = $model->create([
     'nombre' => 'Debug',
     'apellido' => 'User',
-    'cedula' => '999',
+    'cedula' => $cedula,
     'email' => $email,
     'password' => 'abc123',
     'role' => 'vecino'

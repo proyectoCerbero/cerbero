@@ -5,11 +5,12 @@ $config = require __DIR__ . '/../config/database.php';
 $controller = new AuthController($config);
 
 $email = 'prueba_' . time() . '@example.com';
+$cedula = 'CI' . time();
 
 $registerResult = $controller->register([
     'nombre' => 'Ana',
     'apellido' => 'Pérez',
-    'cedula' => '12345678',
+    'cedula' => $cedula,
     'email' => $email,
     'password' => '123456'
 ]);

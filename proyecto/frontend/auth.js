@@ -13,22 +13,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
     };
 
-    const API_BASE_URL = 'http://localhost/proyecto/backend/api/auth.php';
+    const API_BASE_URL = new URL('../backend/api/auth.php', window.location.href).toString();
 
     const fetchJson = async (url, init) => {
         console.debug('auth fetch', url, init);
         const response = await fetch(url, init);
         const text = await response.text();
-        if (!response.ok) {
-            console.error('auth response error', response.status, text);
-            throw new Error(`Servidor respondió ${response.status}: ${text}`);
-        }
+
+        let payload = null;
         try {
-            return JSON.parse(text);
+            payload = text ? JSON.parse(text) : null;
         } catch (error) {
             console.error('auth JSON parse error', text);
             throw new Error(`Respuesta no válida del servidor (${response.status}): ${text}`);
         }
+
+        if (!response.ok) {
+            console.error('auth response error', response.status, payload);
+            throw new Error(payload?.message || `Servidor respondió ${response.status}`);
+        }
+
+        return payload;
     };
 
     const submitLogin = async (attempt = 1) => {
@@ -76,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = 'index.html';
             }
         } catch (error) {
-            statusBox.textContent = `No se pudo conectar con el servidor. ${error.message}`;
+            statusBox.textContent = error.message || 'No se pudo conectar con el servidor.';
             statusBox.style.color = 'crimson';
         } finally {
             loginSubmitting = false;
@@ -129,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = 'index.html';
             }
         } catch (error) {
-            statusBox.textContent = `No se pudo conectar con el servidor. ${error.message}`;
+            statusBox.textContent = error.message || 'No se pudo conectar con el servidor.';
             statusBox.style.color = 'crimson';
         } finally {
             registerSubmitting = false;
