@@ -6,6 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>indice</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+        #mapaInteractivo {
+            width: 100%;
+            height: 350px;
+            border-radius: 10px;
+            margin-top: 15px;
+            z-index: 1;
+        }
+    </style>
 </head>
 
 <body>
@@ -104,20 +115,10 @@
 
             <section class="principal">
 
-                <div class="mapa">
-
-                    <h2>Mapa Interactivo</h2>
-
-                    <div class="zonaMapa">
-
-                        <div class="pin verde"></div>
-                        <div class="pin amarillo"></div>
-                        <div class="pin rojo"></div>
-                        <div class="pin verde segundo"></div>
-
-                    </div>
-
-                </div>
+                        <div class="mapa">
+                        <h2>Mapa Interactivo</h2>
+                        <div id="mapaInteractivo"></div>
+                        </div>
 
                 <div class="actividad">
 
@@ -235,7 +236,7 @@
     </div>
 
     <script>
-        const roles = {
+    const roles = {
             guest: {
                 name: 'Visitante',
                 rol: 'Sin registro',
@@ -253,7 +254,7 @@
                 ]
             },
             vecino: {
-                name: 'Lucía Pérez',
+                name: 'Rafaela Benavides',
                 rol: 'Vecino',
                 initials: 'LP',
                 isLogged: true,
@@ -315,9 +316,8 @@
                     { title: 'Gestionar rutas', desc: 'Modificar planes diarios', href: '#', type: 'secondary' },
                     { title: 'Reportes', desc: 'Analizar desempeño', href: '#', type: 'outline' }
                 ]
-            }
+            },
         };
-
         function logout() {
             localStorage.removeItem('cerberoUser');
             window.location.href = 'index.html';
@@ -374,7 +374,34 @@
             renderRole('guest');
         }
     </script>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Verificar que exista el contenedor del mapa
+            const mapElement = document.getElementById('mapaInteractivo');
+            if (!mapElement) return;
 
+            // Inicializar el mapa (Coordenadas de Montevideo/Ejemplo: -34.9011, -56.1645)
+            const map = L.map('mapaInteractivo').setView([-34.9011, -56.1645], 13);
+
+            // Cargar capa de OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+
+            // Ejemplo de marcadores/contenedores
+            const contenedores = [
+                { lat: -34.9011, lng: -56.1645, estado: 'Normal', tipo: 'Residuos Orgánicos' },
+                { lat: -34.9050, lng: -56.1600, estado: 'Lleno', tipo: 'Plásticos y Reciclables' }
+            ];
+
+            contenedores.forEach(c => {
+                L.marker([c.lat, c.lng])
+                    .addTo(map)
+                    .bindPopup(`<b>Tipo:</b> ${c.tipo}<br><b>Estado:</b> ${c.estado}`);
+            });
+        });
+    </script>
 </body>
 
 </html>
