@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <div class="contenedor">
+
+        <aside class="sidebar">
+
+            <div>
+
+                <h1>Cerbero</h1>
+                <p>Sistema de Gestión de Residuos Urbanos</p>
+
+                <nav>
+
+                    <a href="index.html">Dashboard</a>
+                    <a href="gestion.html">Gestión</a>
+                    <a href="#">Contenedores</a>
+                    <a href="#">Camiones</a>
+                    <a href="#">Incidencias</a>
+                    <a href="#">Instalaciones</a>
+                    <a href="#">Rutas</a>
+                    <a href="#">Reportes</a>
+                    <a href="#">Configuración</a>
+
+                </nav>
+
+            </div>
+
+            <div class="empresa">
+
+                <p>Empresa</p>
+                <h2>Cerbero S.A.S.</h2>
+
+            </div>
+
+        </aside>
+
+        <main class="contenido">
+
+            <header class="gestion-header">
+                <h1>Gestión</h1>
+                <p>Administrá usuarios registrados y cuadrillas de trabajo.</p>
+            </header>
+
+            <section class="gestion-seccion" id="seccionUsuarios">
+
+                <h2>Usuarios</h2>
+                <div id="usuariosStatus" class="gestion-status"></div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>CI</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usuariosTablaBody">
+                        <tr><td colspan="6" class="tabla-vacia">Cargando usuarios...</td></tr>
+                    </tbody>
+                </table>
+
+            </section>
+
+            <section class="gestion-seccion" id="seccionCuadrillas">
+
+                <h2>Cuadrillas</h2>
+                <div id="cuadrillasStatus" class="gestion-status"></div>
+
+                <form id="crearCuadrillaForm" class="form-cuadrilla">
+
+                    <div>
+                        <label for="cuadrillaNombre">Nombre</label>
+                        <input type="text" id="cuadrillaNombre" name="nombre" placeholder="Ej: Cuadrilla Norte" required>
+                    </div>
+
+                    <div>
+                        <label for="cuadrillaTurno">Turno</label>
+                        <select id="cuadrillaTurno" name="turno">
+                            <option value="Mañana">Mañana</option>
+                            <option value="Tarde">Tarde</option>
+                            <option value="Noche">Noche</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="cuadrillaEstado">Estado</label>
+                        <select id="cuadrillaEstado" name="estado">
+                            <option value="activa">Activa</option>
+                            <option value="inactiva">Inactiva</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" id="crearCuadrillaBtn">Crear cuadrilla</button>
+
+                </form>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Turno</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuadrillasTablaBody">
+                        <tr><td colspan="4" class="tabla-vacia">Cargando cuadrillas...</td></tr>
+                    </tbody>
+                </table>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <script src="gestion.js"></script>
+
+</body>
+
+</html>
