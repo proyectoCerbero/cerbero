@@ -1,20 +1,20 @@
 CREATE DATABASE IF NOT EXISTS cerbero;
 USE cerbero;
 
-CREATE TABLE rol (
+CREATE TABLE ROL (
     id_rol INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     descripcion VARCHAR(255)
 );
 
-CREATE TABLE cuadrilla (
+CREATE TABLE CUADRILLA (
     id_cuadrilla INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     turno VARCHAR(30),
     estado VARCHAR(30)
 );
 
-CREATE TABLE usuario (
+CREATE TABLE USUARIO (
     ci CHAR(8) PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     apellido VARCHAR(50) NOT NULL,
@@ -24,27 +24,27 @@ CREATE TABLE usuario (
     estado VARCHAR(30),
     id_rol INT,
     id_cuadrilla INT,
-    FOREIGN KEY (id_rol) REFERENCES rol(id_rol),
-    FOREIGN KEY (id_cuadrilla) REFERENCES cuadrilla(id_cuadrilla)
+    FOREIGN KEY (id_rol) REFERENCES ROL(id_rol),
+    FOREIGN KEY (id_cuadrilla) REFERENCES CUADRILLA(id_cuadrilla)
 );
 
-CREATE TABLE notificacion (
+CREATE TABLE NOTIFICACION (
     id_notificacion INT AUTO_INCREMENT PRIMARY KEY,
     titulo VARCHAR(100),
     mensaje TEXT,
     fecha_hora DATETIME,
     estado VARCHAR(30),
     ci CHAR(8),
-    FOREIGN KEY (ci) REFERENCES usuario(ci)
+    FOREIGN KEY (ci) REFERENCES USUARIO(ci)
 );
 
-CREATE TABLE tipo_incidencia (
+CREATE TABLE TIPO_INCIDENCIA (
     id_tipo_incidencia INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50),
     descripcion VARCHAR(255)
 );
 
-CREATE TABLE ubicacion (
+CREATE TABLE UBICACION (
     id_ubicacion INT AUTO_INCREMENT PRIMARY KEY,
     barrio VARCHAR(100),
     calle VARCHAR(100),
@@ -53,12 +53,12 @@ CREATE TABLE ubicacion (
     longitud DECIMAL(10,7)
 );
 
-CREATE TABLE tipo_residuo (
+CREATE TABLE TIPO_RESIDUO (
     id_tipo_residuo INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50)
 );
 
-CREATE TABLE contenedor (
+CREATE TABLE CONTENEDOR (
     id_contenedor INT AUTO_INCREMENT PRIMARY KEY,
     capacidad DECIMAL(8,2),
     nivel_llenado DECIMAL(5,2),
@@ -67,11 +67,11 @@ CREATE TABLE contenedor (
     estado VARCHAR(30),
     id_ubicacion INT,
     id_tipo_residuo INT,
-    FOREIGN KEY (id_ubicacion) REFERENCES ubicacion(id_ubicacion),
-    FOREIGN KEY (id_tipo_residuo) REFERENCES tipo_residuo(id_tipo_residuo)
+    FOREIGN KEY (id_ubicacion) REFERENCES UBICACION(id_ubicacion),
+    FOREIGN KEY (id_tipo_residuo) REFERENCES TIPO_RESIDUO(id_tipo_residuo)
 );
 
-CREATE TABLE incidencia (
+CREATE TABLE INCIDENCIA (
     id_incidencia INT AUTO_INCREMENT PRIMARY KEY,
     descripcion TEXT,
     fecha_hora_registro DATETIME,
@@ -81,13 +81,13 @@ CREATE TABLE incidencia (
     ci CHAR(8),
     id_cuadrilla INT,
     id_contenedor INT,
-    FOREIGN KEY (id_tipo_incidencia) REFERENCES tipo_incidencia(id_tipo_incidencia),
-    FOREIGN KEY (ci) REFERENCES usuario(ci),
-    FOREIGN KEY (id_cuadrilla) REFERENCES cuadrilla(id_cuadrilla),
-    FOREIGN KEY (id_contenedor) REFERENCES contenedor(id_contenedor)
+    FOREIGN KEY (id_tipo_incidencia) REFERENCES TIPO_INCIDENCIA(id_tipo_incidencia),
+    FOREIGN KEY (ci) REFERENCES USUARIO(ci),
+    FOREIGN KEY (id_cuadrilla) REFERENCES CUADRILLA(id_cuadrilla),
+    FOREIGN KEY (id_contenedor) REFERENCES CONTENEDOR(id_contenedor)
 );
 
-CREATE TABLE camion (
+CREATE TABLE CAMION (
     id_camion INT AUTO_INCREMENT PRIMARY KEY,
     matricula VARCHAR(20) UNIQUE,
     modelo VARCHAR(50),
@@ -97,15 +97,15 @@ CREATE TABLE camion (
     capacidad DECIMAL(8,2),
     estado VARCHAR(30),
     id_cuadrilla INT,
-    FOREIGN KEY (id_cuadrilla) REFERENCES cuadrilla(id_cuadrilla)
+    FOREIGN KEY (id_cuadrilla) REFERENCES CUADRILLA(id_cuadrilla)
 );
 
-CREATE TABLE tipo_mantenimiento (
+CREATE TABLE TIPO_MANTENIMIENTO (
     id_tipo_mantenimiento INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50)
 );
 
-CREATE TABLE mantenimiento (
+CREATE TABLE MANTENIMIENTO (
     id_mantenimiento INT AUTO_INCREMENT PRIMARY KEY,
     descripcion TEXT,
     fecha DATE,
@@ -113,11 +113,11 @@ CREATE TABLE mantenimiento (
     estado VARCHAR(30),
     id_tipo_mantenimiento INT,
     id_camion INT,
-    FOREIGN KEY (id_tipo_mantenimiento) REFERENCES tipo_mantenimiento(id_tipo_mantenimiento),
-    FOREIGN KEY (id_camion) REFERENCES camion(id_camion)
+    FOREIGN KEY (id_tipo_mantenimiento) REFERENCES TIPO_MANTENIMIENTO(id_tipo_mantenimiento),
+    FOREIGN KEY (id_camion) REFERENCES CAMION(id_camion)
 );
 
-CREATE TABLE instalacion (
+CREATE TABLE INSTALACION (
     id_instalacion INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100),
     calle VARCHAR(100),
@@ -128,7 +128,7 @@ CREATE TABLE instalacion (
     estado VARCHAR(30)
 );
 
-CREATE TABLE traslado_residuo (
+CREATE TABLE TRASLADO_RESIDUO (
     id_traslado INT AUTO_INCREMENT PRIMARY KEY,
     fecha DATE,
     cantidad DECIMAL(10,2),
@@ -137,37 +137,37 @@ CREATE TABLE traslado_residuo (
     id_camion INT,
     id_tipo_residuo INT,
     id_instalacion INT,
-    FOREIGN KEY (id_camion) REFERENCES camion(id_camion),
-    FOREIGN KEY (id_tipo_residuo) REFERENCES tipo_residuo(id_tipo_residuo),
-    FOREIGN KEY (id_instalacion) REFERENCES instalacion(id_instalacion)
+    FOREIGN KEY (id_camion) REFERENCES CAMION(id_camion),
+    FOREIGN KEY (id_tipo_residuo) REFERENCES TIPO_RESIDUO(id_tipo_residuo),
+    FOREIGN KEY (id_instalacion) REFERENCES INSTALACION(id_instalacion)
 );
 
-CREATE TABLE repuesto (
+CREATE TABLE REPUESTO (
     id_repuesto INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100),
     costo DECIMAL(10,2),
     stock_minimo INT,
     cantidad INT,
     id_instalacion INT,
-    FOREIGN KEY (id_instalacion) REFERENCES instalacion(id_instalacion)
+    FOREIGN KEY (id_instalacion) REFERENCES INSTALACION(id_instalacion)
 );
 
-CREATE TABLE tipo_maquinaria (
+CREATE TABLE TIPO_MAQUINARIA (
     id_tipo_maquinaria INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50)
 );
 
-CREATE TABLE maquinaria (
+CREATE TABLE MAQUINARIA (
     id_maquinaria INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100),
     id_tipo_maquinaria INT,
     estado VARCHAR(30),
     id_instalacion INT,
-    FOREIGN KEY (id_tipo_maquinaria) REFERENCES tipo_maquinaria(id_tipo_maquinaria),
-    FOREIGN KEY (id_instalacion) REFERENCES instalacion(id_instalacion)
+    FOREIGN KEY (id_tipo_maquinaria) REFERENCES TIPO_MAQUINARIA(id_tipo_maquinaria),
+    FOREIGN KEY (id_instalacion) REFERENCES INSTALACION(id_instalacion)
 );
 
-CREATE TABLE ruta_recoleccion (
+CREATE TABLE RUTA_RECOLECCION (
     id_ruta INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100),
     frecuencia VARCHAR(50),
@@ -177,15 +177,15 @@ CREATE TABLE ruta_recoleccion (
     hora_fin TIME,
     fecha DATE,
     id_cuadrilla INT,
-    FOREIGN KEY (id_cuadrilla) REFERENCES cuadrilla(id_cuadrilla)
+    FOREIGN KEY (id_cuadrilla) REFERENCES CUADRILLA(id_cuadrilla)
 );
 
-CREATE TABLE tipo_reparacion (
+CREATE TABLE TIPO_REPARACION (
     id_tipo_reparacion INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50)
 );
 
-CREATE TABLE reparacion_contenedor (
+CREATE TABLE REPARACION_CONTENEDOR (
     id_reparacion INT AUTO_INCREMENT PRIMARY KEY,
     estado VARCHAR(30),
     costo DECIMAL(10,2),
@@ -194,17 +194,17 @@ CREATE TABLE reparacion_contenedor (
     fecha_salida DATE,
     id_tipo_reparacion INT,
     id_contenedor INT,
-    FOREIGN KEY (id_tipo_reparacion) REFERENCES tipo_reparacion(id_tipo_reparacion),
-    FOREIGN KEY (id_contenedor) REFERENCES contenedor(id_contenedor)
+    FOREIGN KEY (id_tipo_reparacion) REFERENCES TIPO_REPARACION(id_tipo_reparacion),
+    FOREIGN KEY (id_contenedor) REFERENCES CONTENEDOR(id_contenedor)
 );
 
-CREATE TABLE tipo_prediccion (
+CREATE TABLE TIPO_PREDICCION (
     id_tipo_prediccion INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50),
     descripcion VARCHAR(255)
 );
 
-CREATE TABLE prediccion (
+CREATE TABLE PREDICCION (
     id_prediccion INT AUTO_INCREMENT PRIMARY KEY,
     fecha_objetivo DATE,
     fecha_generacion DATE,
@@ -213,30 +213,22 @@ CREATE TABLE prediccion (
     tipo_prediccion VARCHAR(50),
     estado VARCHAR(30),
     id_ubicacion INT,
-    FOREIGN KEY (id_ubicacion) REFERENCES ubicacion(id_ubicacion)
+    FOREIGN KEY (id_ubicacion) REFERENCES UBICACION(id_ubicacion)
 );
 
 
-CREATE TABLE instalacion_tipo_residuo (
+CREATE TABLE INSTALACION_TIPO_RESIDUO (
     id_instalacion INT,
     id_tipo_residuo INT,
     PRIMARY KEY (id_instalacion, id_tipo_residuo),
-    FOREIGN KEY (id_instalacion) REFERENCES instalacion(id_instalacion),
-    FOREIGN KEY (id_tipo_residuo) REFERENCES tipo_residuo(id_tipo_residuo)
+    FOREIGN KEY (id_instalacion) REFERENCES INSTALACION(id_instalacion),
+    FOREIGN KEY (id_tipo_residuo) REFERENCES TIPO_RESIDUO(id_tipo_residuo)
 );
 
-CREATE TABLE ruta_ubicacion (
+CREATE TABLE RUTA_UBICACION (
     id_ruta INT,
     id_ubicacion INT,
     PRIMARY KEY (id_ruta, id_ubicacion),
-    FOREIGN KEY (id_ruta) REFERENCES ruta_recoleccion(id_ruta),
-    FOREIGN KEY (id_ubicacion) REFERENCES ubicacion(id_ubicacion)
+    FOREIGN KEY (id_ruta) REFERENCES RUTA_RECOLECCION(id_ruta),
+    FOREIGN KEY (id_ubicacion) REFERENCES UBICACION(id_ubicacion)
 );
-
--- Roles base del sistema. Los nombres deben coincidir con los que espera el frontend
--- (roles definidos en frontend/index.html: vecino, cuadrilla, operario, admin).
-INSERT INTO rol (nombre, descripcion) VALUES
-    ('vecino', 'Vecino registrado que puede reportar incidencias'),
-    ('cuadrilla', 'Integrante de una cuadrilla de recolección'),
-    ('operario', 'Operario de instalación'),
-    ('admin', 'Administrador municipal con acceso de gestión');

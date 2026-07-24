@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 
 class Database
@@ -19,3 +20,16 @@ class Database
         return $pdo;
     }
 }
+=======
+<?php
+
+return [
+    'driver' => 'mysql',
+    'host' => '127.0.0.1',
+    'port' => 3306,
+    'database' => 'cerbero',
+    'username' => 'root',
+    'password' => '',
+    'charset' => 'utf8mb4'
+];
+>>>>>>> b90c71c8d22dc91fbb18d9ef11642352875cfa4e
