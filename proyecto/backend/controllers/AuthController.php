@@ -54,7 +54,7 @@ class AuthController
         $password = $input['password'] ?? '';
 
         if ($email === '' || $password === '') {
-            return $this->jsonResponse(false, 'Correo y contraseña son obligatorios.', 400);
+            return $this->jsonResponse(false, 'Correo y contrasena son obligatorios.', 400);
         }
 
         $user = $this->userModel->findByEmail($email);

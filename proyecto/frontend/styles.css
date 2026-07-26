@@ -107,6 +107,122 @@ body{
     margin-bottom:22px;
 }
 
+.gestion-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:20px;
+    padding:24px;
+    margin-bottom:20px;
+    border-radius:20px;
+    background:linear-gradient(135deg, #edf7ef, #dcefe3);
+    box-shadow:0 2px 10px rgba(27, 67, 50, 0.12);
+}
+
+.gestion-heading h1{
+    font-size:28px;
+    color:#1B4332;
+    margin:8px 0 6px;
+}
+
+.gestion-heading p{
+    color:#4f6357;
+    line-height:1.5;
+    max-width:680px;
+}
+
+.pill-gestion{
+    background:#2D6A4F;
+    color:white;
+}
+
+.gestion-actions{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.gestion-summary{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:16px;
+    margin-bottom:20px;
+}
+
+.gestion-summary-card{
+    background:white;
+    padding:18px;
+    border-radius:16px;
+    box-shadow:0 2px 10px rgba(27, 67, 50, 0.08);
+}
+
+.gestion-summary-card h3{
+    color:#2D6A4F;
+    margin-bottom:8px;
+}
+
+.gestion-summary-card p{
+    color:#5f6d68;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.gestion-grid{
+    display:grid;
+    gap:20px;
+}
+
+.gestion-seccion{
+    background:white;
+    padding:24px;
+    border-radius:20px;
+    box-shadow:0 2px 10px rgba(27, 67, 50, 0.08);
+}
+
+.gestion-seccion h2{
+    color:#1B4332;
+    margin-bottom:12px;
+}
+
+.gestion-status{
+    color:#2D6A4F;
+    font-size:13px;
+    margin-bottom:12px;
+}
+
+.form-cuadrilla{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+    gap:12px;
+    padding:16px;
+    margin-bottom:16px;
+    border-radius:14px;
+    background:#f7faf8;
+}
+
+.form-cuadrilla label{
+    display:block;
+    margin-bottom:6px;
+    color:#2D6A4F;
+    font-weight:bold;
+}
+
+.form-cuadrilla input,
+.form-cuadrilla select{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid #d3ddd4;
+    border-radius:10px;
+    background:white;
+}
+
+.form-cuadrilla button,
+.gestion-actions .ghost-btn,
+.gestion-actions .auth-btn{
+    margin-top:0;
+}
+
 .titulo-principal h1{
     font-size:30px;
 }

@@ -3,7 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const CUADRILLAS_URL = new URL('../backend/api/cuadrillas.php', window.location.href).toString();
     const CAMIONES_URL = new URL('../backend/api/camiones.php', window.location.href).toString();
 
-    const ROLES = ['vecino', 'cuadrilla', 'operario', 'admin'];
+    const ROLE_OPTIONS = [
+        { value: 'vecino', label: 'Vecino' },
+        { value: 'cuadrilla de recolección', label: 'Cuadrilla de recolección' },
+        { value: 'operario de centro', label: 'Operario de centro' },
+        { value: 'administrador municipal', label: 'Administrador municipal' }
+    ];
     const ESTADOS_USUARIO = ['activo', 'inactivo', 'suspendido'];
 
     const usuariosStatus = document.getElementById('usuariosStatus');
@@ -18,6 +23,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const crearCamionForm = document.getElementById('crearCamionForm');
     const crearCamionBtn = document.getElementById('crearCamionBtn');
     const camionCuadrillaSelect = document.getElementById('camionCuadrilla');
+
+    const currentUser = JSON.parse(localStorage.getItem('cerberoUser') || 'null');
+    const viewSelector = document.getElementById('gestionViewSelector');
+    const isExampleAdminView = () => viewSelector?.value === 'admin';
+    const isCurrentUserAdmin = () => isExampleAdminView() || String(currentUser?.role || '').trim().toLowerCase() === 'administrador municipal' || String(currentUser?.role || '').trim().toLowerCase() === 'admin';
+
+    const normalizeRoleValue = (roleName) => {
+        const value = String(roleName || '').trim().toLowerCase();
+        if (['admin', 'administrador', 'administrador municipal'].includes(value)) return 'administrador municipal';
+        if (['cuadrilla', 'cuadrilla de recoleccion', 'cuadrilla de recolección'].includes(value)) return 'cuadrilla de recolección';
+        if (['operario', 'operario de centro'].includes(value)) return 'operario de centro';
+        if (value === 'vecino') return 'vecino';
+        return value;
+    };
 
     const showStatus = (el, message, isError = false) => {
         el.textContent = message;
@@ -51,16 +70,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         usuariosBody.innerHTML = usuarios.map((usuario) => {
-            const rolActual = usuario.role || 'vecino';
+            const rolActual = normalizeRoleValue(usuario.role || 'vecino');
             const estadoActual = usuario.estado || 'activo';
             const badgeClass = estadoActual === 'activo' ? 'badge-activo' : (estadoActual === 'suspendido' ? 'badge-suspendido' : 'badge-inactivo');
             const proximoEstado = estadoActual === 'activo' ? 'inactivo' : 'activo';
             const textoBoton = estadoActual === 'activo' ? 'Desactivar' : 'Activar';
             const claseBoton = estadoActual === 'activo' ? 'btn-accion peligro' : 'btn-accion';
-
-            const opcionesRol = ROLES.map((rol) => (
-                `<option value="${rol}" ${rol === rolActual ? 'selected' : ''}>${rol}</option>`
+            const opcionesRol = ROLE_OPTIONS.map((rol) => (
+                `<option value="${rol.value}" ${rol.value === rolActual ? 'selected' : ''}>${rol.label}</option>`
             )).join('');
+            const puedeEditarRol = isCurrentUserAdmin();
+            const puedeCambiarEstado = isCurrentUserAdmin();
 
             return `
                 <tr data-ci="${usuario.ci}">
@@ -68,13 +88,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${usuario.nombre} ${usuario.apellido}</td>
                     <td>${usuario.email}</td>
                     <td>
-                        <select class="rol-select">${opcionesRol}</select>
+                        ${puedeEditarRol
+                            ? `<select class="rol-select">${opcionesRol}</select>`
+                            : `<span class="badge">${ROLE_OPTIONS.find((rol) => rol.value === rolActual)?.label || rolActual}</span>`}
                     </td>
                     <td><span class="badge ${badgeClass}">${estadoActual}</span></td>
                     <td>
                         <div class="acciones-cell">
-                            <button type="button" class="btn-accion btn-guardar-rol">Guardar rol</button>
-                            <button type="button" class="${claseBoton} btn-toggle-estado" data-proximo-estado="${proximoEstado}">${textoBoton}</button>
+                            ${puedeEditarRol ? '<button type="button" class="btn-accion btn-guardar-rol">Guardar rol</button>' : ''}
+                            ${puedeCambiarEstado
+                                ? `<button type="button" class="${claseBoton} btn-toggle-estado" data-proximo-estado="${proximoEstado}">${textoBoton}</button>`
+                                : ''}
                         </div>
                     </td>
                 </tr>
@@ -100,6 +124,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Botón: guardar rol seleccionado
         if (event.target.classList.contains('btn-guardar-rol')) {
+            if (!isCurrentUserAdmin()) {
+                showStatus(usuariosStatus, 'Solo un administrador puede cambiar roles.', true);
+                return;
+            }
+
             const rolSeleccionado = fila.querySelector('.rol-select').value;
             const boton = event.target;
             boton.disabled = true;
@@ -109,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await fetchJson(`${USUARIOS_URL}?action=rol`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ci, rol: rolSeleccionado })
+                    body: JSON.stringify({ ci, rol: rolSeleccionado, requester_role: currentUser?.role || '' })
                 });
 
                 showStatus(usuariosStatus, result.message, !result.success);
@@ -123,6 +152,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Botón: activar/desactivar
         if (event.target.classList.contains('btn-toggle-estado')) {
+            if (!isCurrentUserAdmin()) {
+                showStatus(usuariosStatus, 'Solo un administrador puede activar o desactivar usuarios.', true);
+                return;
+            }
+
             const boton = event.target;
             const proximoEstado = boton.dataset.proximoEstado;
             boton.disabled = true;
@@ -161,6 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
             `).join('');
         }
 
+        if (crearCuadrillaForm) {
+            crearCuadrillaForm.style.display = isCurrentUserAdmin() ? 'grid' : 'none';
+        }
+        if (crearCuadrillaBtn) {
+            crearCuadrillaBtn.disabled = !isCurrentUserAdmin();
+        }
+
         // Mantiene sincronizado el <select> de cuadrillas del formulario de camiones.
         if (camionCuadrillaSelect) {
             const seleccionActual = camionCuadrillaSelect.value;
@@ -185,6 +226,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     crearCuadrillaForm.addEventListener('submit', async (event) => {
         event.preventDefault();
+
+        if (!isCurrentUserAdmin()) {
+            showStatus(cuadrillasStatus, 'Solo un administrador puede crear cuadrillas.', true);
+            return;
+        }
 
         const nombre = document.getElementById('cuadrillaNombre').value.trim();
         const turno = document.getElementById('cuadrillaTurno').value;
@@ -223,21 +269,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderCamiones = (camiones) => {
         if (!camiones.length) {
             camionesBody.innerHTML = '<tr><td colspan="8" class="tabla-vacia">No hay camiones registrados todavía.</td></tr>';
-            return;
+        } else {
+            camionesBody.innerHTML = camiones.map((camion) => `
+                <tr>
+                    <td>${camion.id_camion}</td>
+                    <td>${camion.matricula}</td>
+                    <td>${camion.marca} ${camion.modelo}</td>
+                    <td>${camion.anio}</td>
+                    <td>${camion.kilometraje ?? 0}</td>
+                    <td>${camion.capacidad ?? 0}</td>
+                    <td><span class="badge ${camion.estado === 'activo' ? 'badge-activo' : (camion.estado === 'mantenimiento' ? 'badge-inactivo' : 'badge-suspendido')}">${camion.estado ?? '-'}</span></td>
+                    <td>${camion.cuadrilla_nombre ?? 'Sin asignar'}</td>
+                </tr>
+            `).join('');
         }
 
-        camionesBody.innerHTML = camiones.map((camion) => `
-            <tr>
-                <td>${camion.id_camion}</td>
-                <td>${camion.matricula}</td>
-                <td>${camion.marca} ${camion.modelo}</td>
-                <td>${camion.anio}</td>
-                <td>${camion.kilometraje ?? 0}</td>
-                <td>${camion.capacidad ?? 0}</td>
-                <td><span class="badge ${camion.estado === 'activo' ? 'badge-activo' : (camion.estado === 'mantenimiento' ? 'badge-inactivo' : 'badge-suspendido')}">${camion.estado ?? '-'}</span></td>
-                <td>${camion.cuadrilla_nombre ?? 'Sin asignar'}</td>
-            </tr>
-        `).join('');
+        if (crearCamionForm) {
+            crearCamionForm.style.display = isCurrentUserAdmin() ? 'grid' : 'none';
+        }
+        if (crearCamionBtn) {
+            crearCamionBtn.disabled = !isCurrentUserAdmin();
+        }
+        if (camionCuadrillaSelect) {
+            camionCuadrillaSelect.disabled = !isCurrentUserAdmin();
+        }
     };
 
     const cargarCamiones = async () => {
@@ -253,6 +308,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     crearCamionForm.addEventListener('submit', async (event) => {
         event.preventDefault();
+
+        if (!isCurrentUserAdmin()) {
+            showStatus(camionesStatus, 'Solo un administrador puede crear camiones.', true);
+            return;
+        }
 
         const matricula = document.getElementById('camionMatricula').value.trim();
         const marca = document.getElementById('camionMarca').value.trim();
@@ -299,6 +359,14 @@ document.addEventListener('DOMContentLoaded', () => {
             crearCamionBtn.disabled = false;
         }
     });
+
+    if (viewSelector) {
+        viewSelector.addEventListener('change', async () => {
+            await cargarUsuarios();
+            await cargarCuadrillas();
+            await cargarCamiones();
+        });
+    }
 
     cargarUsuarios();
     cargarCuadrillas();

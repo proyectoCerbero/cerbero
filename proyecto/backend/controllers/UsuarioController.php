@@ -7,7 +7,7 @@ class UsuarioController
     private UserModel $userModel;
 
     /** Roles válidos que puede asignar un administrador. */
-    private const ROLES_VALIDOS = ['vecino', 'cuadrilla', 'operario', 'admin'];
+    private const ROLES_VALIDOS = ['vecino', 'cuadrilla de recolección', 'operario de centro', 'administrador municipal', 'cuadrilla', 'operario', 'admin'];
 
     /** Estados válidos de una cuenta. */
     private const ESTADOS_VALIDOS = ['activo', 'inactivo', 'suspendido'];
@@ -58,12 +58,19 @@ class UsuarioController
     {
         $ci = trim($input['ci'] ?? '');
         $rol = trim($input['rol'] ?? '');
+        $requesterRole = trim($input['requester_role'] ?? '');
 
         if ($ci === '' || $rol === '') {
             return $this->jsonResponse(false, 'ci y rol son obligatorios.', 400);
         }
 
-        if (!in_array($rol, self::ROLES_VALIDOS, true)) {
+        if (!$this->isAdminRole($requesterRole)) {
+            return $this->jsonResponse(false, 'Solo un administrador puede cambiar roles.', 403);
+        }
+
+        $rolNormalizado = $this->userModel->normalizeRoleName($rol);
+
+        if (!in_array($rol, self::ROLES_VALIDOS, true) && !in_array($rolNormalizado, self::ROLES_VALIDOS, true)) {
             return $this->jsonResponse(
                 false,
                 'Rol inválido. Valores permitidos: ' . implode(', ', self::ROLES_VALIDOS) . '.',
@@ -75,7 +82,7 @@ class UsuarioController
             return $this->jsonResponse(false, 'Usuario no encontrado.', 404);
         }
 
-        $idRol = $this->userModel->findRoleIdByName($rol);
+        $idRol = $this->userModel->findRoleIdByName($rolNormalizado);
 
         if ($idRol === null) {
             return $this->jsonResponse(false, "El rol '$rol' no existe en la base de datos.", 500);
@@ -86,6 +93,13 @@ class UsuarioController
         return $this->jsonResponse(true, 'Rol actualizado correctamente.', 200, [
             'usuario' => $this->userModel->findByCi($ci)
         ]);
+    }
+
+    private function isAdminRole(string $roleName): bool
+    {
+        $normalizedRole = $this->userModel->normalizeRoleName($roleName);
+
+        return in_array($normalizedRole, ['administrador municipal', 'admin'], true);
     }
 
     private function jsonResponse(bool $success, string $message, int $status, array $data = []): array

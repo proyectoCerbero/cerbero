@@ -47,158 +47,189 @@
         <main class="contenido">
 
             <header class="gestion-header">
-                <h1>Gestión</h1>
-                <p>Administrá usuarios registrados y cuadrillas de trabajo.</p>
+                <div class="gestion-heading">
+                    <span class="pill pill-gestion">Administración</span>
+                    <h1>Gestión</h1>
+                    <p>Administrá usuarios registrados, cuadrillas de trabajo y operaciones del sistema desde una vista más clara y coherente con el resto de la plataforma.</p>
+                </div>
+                <div class="gestion-actions">
+                    <label class="role-selector" for="gestionViewSelector" style="display:flex;align-items:center;gap:8px;font-weight:600;">
+                        <span>Vista de ejemplo</span>
+                        <select id="gestionViewSelector">
+                            <option value="actual">Actual</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </label>
+                    <a class="auth-btn secondary" href="index.html">Volver al inicio</a>
+                    <button class="ghost-btn" type="button">Nuevo registro</button>
+                </div>
             </header>
 
-            <section class="gestion-seccion" id="seccionUsuarios">
-
-                <h2>Usuarios</h2>
-                <div id="usuariosStatus" class="gestion-status"></div>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>CI</th>
-                            <th>Nombre</th>
-                            <th>Email</th>
-                            <th>Rol</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usuariosTablaBody">
-                        <tr><td colspan="6" class="tabla-vacia">Cargando usuarios...</td></tr>
-                    </tbody>
-                </table>
-
+            <section class="gestion-summary">
+                <div class="gestion-summary-card">
+                    <h3>Usuarios</h3>
+                    <p>Controlá accesos, estados y permisos del personal y vecinos.</p>
+                </div>
+                <div class="gestion-summary-card">
+                    <h3>Cuadrillas</h3>
+                    <p>Organizá equipos, turnos y estado operativo.</p>
+                </div>
+                <div class="gestion-summary-card">
+                    <h3>Camiones</h3>
+                    <p>Asigná vehículos y observá su disponibilidad en tiempo real.</p>
+                </div>
             </section>
 
-            <section class="gestion-seccion" id="seccionCuadrillas">
+            <div class="gestion-grid">
+                <section class="gestion-seccion" id="seccionUsuarios">
 
-                <h2>Cuadrillas</h2>
-                <div id="cuadrillasStatus" class="gestion-status"></div>
+                    <h2>Usuarios</h2>
+                    <div id="usuariosStatus" class="gestion-status"></div>
 
-                <form id="crearCuadrillaForm" class="form-cuadrilla">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>CI</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usuariosTablaBody">
+                            <tr><td colspan="6" class="tabla-vacia">Cargando usuarios...</td></tr>
+                        </tbody>
+                    </table>
 
-                    <div>
-                        <label for="cuadrillaNombre">Nombre</label>
-                        <input type="text" id="cuadrillaNombre" name="nombre" placeholder="Ej: Cuadrilla Norte" required>
-                    </div>
+                </section>
 
-                    <div>
-                        <label for="cuadrillaTurno">Turno</label>
-                        <select id="cuadrillaTurno" name="turno">
-                            <option value="Mañana">Mañana</option>
-                            <option value="Tarde">Tarde</option>
-                            <option value="Noche">Noche</option>
-                        </select>
-                    </div>
+                <section class="gestion-seccion" id="seccionCuadrillas">
 
-                    <div>
-                        <label for="cuadrillaEstado">Estado</label>
-                        <select id="cuadrillaEstado" name="estado">
-                            <option value="activa">Activa</option>
-                            <option value="inactiva">Inactiva</option>
-                        </select>
-                    </div>
+                    <h2>Cuadrillas</h2>
+                    <div id="cuadrillasStatus" class="gestion-status"></div>
 
-                    <button type="submit" id="crearCuadrillaBtn">Crear cuadrilla</button>
+                    <form id="crearCuadrillaForm" class="form-cuadrilla">
 
-                </form>
+                        <div>
+                            <label for="cuadrillaNombre">Nombre</label>
+                            <input type="text" id="cuadrillaNombre" name="nombre" placeholder="Ej: Cuadrilla Norte" required>
+                        </div>
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Turno</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cuadrillasTablaBody">
-                        <tr><td colspan="4" class="tabla-vacia">Cargando cuadrillas...</td></tr>
-                    </tbody>
-                </table>
+                        <div>
+                            <label for="cuadrillaTurno">Turno</label>
+                            <select id="cuadrillaTurno" name="turno">
+                                <option value="Mañana">Mañana</option>
+                                <option value="Tarde">Tarde</option>
+                                <option value="Noche">Noche</option>
+                            </select>
+                        </div>
 
-            </section>
+                        <div>
+                            <label for="cuadrillaEstado">Estado</label>
+                            <select id="cuadrillaEstado" name="estado">
+                                <option value="activa">Activa</option>
+                                <option value="inactiva">Inactiva</option>
+                            </select>
+                        </div>
 
-            <section class="gestion-seccion" id="seccionCamiones">
+                        <button type="submit" id="crearCuadrillaBtn">Crear cuadrilla</button>
 
-                <h2>Camiones</h2>
-                <div id="camionesStatus" class="gestion-status"></div>
+                    </form>
 
-                <form id="crearCamionForm" class="form-cuadrilla">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Turno</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuadrillasTablaBody">
+                            <tr><td colspan="4" class="tabla-vacia">Cargando cuadrillas...</td></tr>
+                        </tbody>
+                    </table>
 
-                    <div>
-                        <label for="camionMatricula">Matrícula</label>
-                        <input type="text" id="camionMatricula" name="matricula" placeholder="Ej: SBA1234" required>
-                    </div>
+                </section>
 
-                    <div>
-                        <label for="camionMarca">Marca</label>
-                        <input type="text" id="camionMarca" name="marca" placeholder="Ej: Volvo" required>
-                    </div>
+                <section class="gestion-seccion" id="seccionCamiones">
 
-                    <div>
-                        <label for="camionModelo">Modelo</label>
-                        <input type="text" id="camionModelo" name="modelo" placeholder="Ej: FMX 380" required>
-                    </div>
+                    <h2>Camiones</h2>
+                    <div id="camionesStatus" class="gestion-status"></div>
 
-                    <div>
-                        <label for="camionAnio">Año</label>
-                        <input type="number" id="camionAnio" name="anio" placeholder="Ej: 2020" min="1950" required>
-                    </div>
+                    <form id="crearCamionForm" class="form-cuadrilla">
 
-                    <div>
-                        <label for="camionKilometraje">Kilometraje</label>
-                        <input type="number" id="camionKilometraje" name="kilometraje" placeholder="0" min="0">
-                    </div>
+                        <div>
+                            <label for="camionMatricula">Matrícula</label>
+                            <input type="text" id="camionMatricula" name="matricula" placeholder="Ej: SBA1234" required>
+                        </div>
 
-                    <div>
-                        <label for="camionCapacidad">Capacidad (m³)</label>
-                        <input type="number" id="camionCapacidad" name="capacidad" placeholder="0" min="0" step="0.1">
-                    </div>
+                        <div>
+                            <label for="camionMarca">Marca</label>
+                            <input type="text" id="camionMarca" name="marca" placeholder="Ej: Volvo" required>
+                        </div>
 
-                    <div>
-                        <label for="camionEstado">Estado</label>
-                        <select id="camionEstado" name="estado">
-                            <option value="activo">Activo</option>
-                            <option value="mantenimiento">Mantenimiento</option>
-                            <option value="inactivo">Inactivo</option>
-                        </select>
-                    </div>
+                        <div>
+                            <label for="camionModelo">Modelo</label>
+                            <input type="text" id="camionModelo" name="modelo" placeholder="Ej: FMX 380" required>
+                        </div>
 
-                    <div>
-                        <label for="camionCuadrilla">Cuadrilla asignada</label>
-                        <select id="camionCuadrilla" name="id_cuadrilla">
-                            <option value="">Sin asignar</option>
-                        </select>
-                    </div>
+                        <div>
+                            <label for="camionAnio">Año</label>
+                            <input type="number" id="camionAnio" name="anio" placeholder="Ej: 2020" min="1950" required>
+                        </div>
 
-                    <button type="submit" id="crearCamionBtn">Crear camión</button>
+                        <div>
+                            <label for="camionKilometraje">Kilometraje</label>
+                            <input type="number" id="camionKilometraje" name="kilometraje" placeholder="0" min="0">
+                        </div>
 
-                </form>
+                        <div>
+                            <label for="camionCapacidad">Capacidad (m³)</label>
+                            <input type="number" id="camionCapacidad" name="capacidad" placeholder="0" min="0" step="0.1">
+                        </div>
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Matrícula</th>
-                            <th>Marca / Modelo</th>
-                            <th>Año</th>
-                            <th>Km</th>
-                            <th>Capacidad</th>
-                            <th>Estado</th>
-                            <th>Cuadrilla</th>
-                        </tr>
-                    </thead>
-                    <tbody id="camionesTablaBody">
-                        <tr><td colspan="8" class="tabla-vacia">Cargando camiones...</td></tr>
-                    </tbody>
-                </table>
+                        <div>
+                            <label for="camionEstado">Estado</label>
+                            <select id="camionEstado" name="estado">
+                                <option value="activo">Activo</option>
+                                <option value="mantenimiento">Mantenimiento</option>
+                                <option value="inactivo">Inactivo</option>
+                            </select>
+                        </div>
 
-            </section>
+                        <div>
+                            <label for="camionCuadrilla">Cuadrilla asignada</label>
+                            <select id="camionCuadrilla" name="id_cuadrilla">
+                                <option value="">Sin asignar</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" id="crearCamionBtn">Crear camión</button>
+
+                    </form>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Matrícula</th>
+                                <th>Marca / Modelo</th>
+                                <th>Año</th>
+                                <th>Km</th>
+                                <th>Capacidad</th>
+                                <th>Estado</th>
+                                <th>Cuadrilla</th>
+                            </tr>
+                        </thead>
+                        <tbody id="camionesTablaBody">
+                            <tr><td colspan="8" class="tabla-vacia">Cargando camiones...</td></tr>
+                        </tbody>
+                    </table>
+
+                </section>
+            </div>
 
         </main>
 

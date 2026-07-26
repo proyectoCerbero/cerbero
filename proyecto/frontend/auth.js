@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            statusBox.textContent = 'Completá correo y contraseña.';
+            statusBox.textContent = 'Completá correo y contrasena.';
             statusBox.style.color = 'crimson';
             return;
         }

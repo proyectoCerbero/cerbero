@@ -35,23 +35,43 @@ function cerbero_ensure_database(array $config): void
         );
     }
 
-    // ¿Ya existe la base de datos?
     $stmt = $pdo->prepare(
         'SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = ?'
     );
     $stmt->execute([$dbName]);
 
-    if ($stmt->fetchColumn() !== false) {
-        return; // Ya existe, no hacemos nada.
+    if ($stmt->fetchColumn() === false) {
+        $pdo->exec("CREATE DATABASE IF NOT EXISTS `$dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
     }
 
-    // No existe: la creamos importando el dump que viene con el proyecto.
+    $pdo->exec("USE `$dbName`");
+
+    $tableCheck = $pdo->query('SHOW TABLES');
+    $existingTables = array_map('strtolower', $tableCheck->fetchAll(PDO::FETCH_COLUMN));
+
+    if (in_array('usuario', $existingTables, true)) {
+        $columnCheck = $pdo->query('SHOW COLUMNS FROM usuario LIKE "contrasena_hash"');
+        $contrasenaHashExists = $columnCheck->rowCount() > 0;
+
+        if (!$contrasenaHashExists) {
+            $legacyColumnCheck = $pdo->query('SHOW COLUMNS FROM usuario LIKE "contraseña_hash"');
+            if ($legacyColumnCheck->rowCount() > 0) {
+                $pdo->exec('ALTER TABLE usuario CHANGE contraseña_hash contrasena_hash VARCHAR(255) NOT NULL');
+            }
+        }
+    }
+
+    $existingTables = array_map('strtolower', $tableCheck->fetchAll(PDO::FETCH_COLUMN));
+
+    if (in_array('rol', $existingTables, true) && in_array('cuadrilla', $existingTables, true)) {
+        return;
+    }
+
     $sqlFile = __DIR__ . '/../../../CERBEROBD.sql';
 
     if (!file_exists($sqlFile)) {
         throw new RuntimeException(
-            "La base de datos '$dbName' no existe y no se encontró el archivo " .
-            "CERBEROBD.sql en $sqlFile para crearla automáticamente."
+            "No se encontró el archivo CERBEROBD.sql en $sqlFile para inicializar la base de datos."
         );
     }
 

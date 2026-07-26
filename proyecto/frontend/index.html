@@ -93,22 +93,22 @@
 
                 <div class="card">
                     <h3>Incidencias Abiertas</h3>
-                    <span>34</span>
+                    <span id="metric-incidencias">--</span>
                 </div>
 
                 <div class="card">
                     <h3>Contenedores Activos</h3>
-                    <span>1245</span>
+                    <span id="metric-contenedores">--</span>
                 </div>
 
                 <div class="card">
                     <h3>Camiones Operativos</h3>
-                    <span>18</span>
+                    <span id="metric-camiones">--</span>
                 </div>
 
                 <div class="card">
                     <h3>Toneladas Recolectadas</h3>
-                    <span>245T</span>
+                    <span id="metric-toneladas">--</span>
                 </div>
 
             </section>
@@ -124,13 +124,8 @@
 
                     <h2>Actividad Reciente</h2>
 
-                    <ul>
-
-                        <li>Contenedor desbordado en Zona Centro</li>
-                        <li>Camión #14 asignado a Ruta Norte</li>
-                        <li>Incidencia resuelta en Parque Rodó</li>
-                        <li>Nuevo usuario registrado</li>
-
+                    <ul id="activityList">
+                        <li>Cargando actividad reciente...</li>
                     </ul>
 
                 </div>
@@ -158,29 +153,9 @@
 
                         </tr>
 
-                        <tr>
-
-                            <td>CTR-102</td>
-                            <td>Centro</td>
-                            <td>Funcional</td>
-
-                        </tr>
-
-                        <tr>
-
-                            <td>CTR-201</td>
-                            <td>Cordón</td>
-                            <td>Desbordado</td>
-
-                        </tr>
-
-                        <tr>
-
-                            <td>CTR-315</td>
-                            <td>Pocitos</td>
-                            <td>En reparación</td>
-
-                        </tr>
+                        <tbody id="contenedoresTableBody">
+                            <tr><td colspan="3" class="tabla-vacia">Cargando contenedores...</td></tr>
+                        </tbody>
 
                     </table>
 
@@ -204,26 +179,9 @@
 
                         </tr>
 
-                        <tr>
-
-                            <td>Camión #14</td>
-                            <td>Operativo</td>
-
-                        </tr>
-
-                        <tr>
-
-                            <td>Camión #08</td>
-                            <td>Mantenimiento</td>
-
-                        </tr>
-
-                        <tr>
-
-                            <td>Camión #21</td>
-                            <td>Ruta Norte</td>
-
-                        </tr>
+                        <tbody id="camionesTableBody">
+                            <tr><td colspan="2" class="tabla-vacia">Cargando camiones...</td></tr>
+                        </tbody>
 
                     </table>
 
@@ -323,15 +281,51 @@
             window.location.href = 'index.html';
         }
 
+        function normalizeRoleKey(roleValue) {
+            const value = String(roleValue || '').trim().toLowerCase();
+            const aliases = {
+                'admin': 'admin',
+                'administrador': 'admin',
+                'administrador municipal': 'admin',
+                'cuadrilla': 'cuadrilla',
+                'cuadrilla de recoleccion': 'cuadrilla',
+                'cuadrilla de recolección': 'cuadrilla',
+                'operario': 'operario',
+                'operario de centro': 'operario',
+                'vecino': 'vecino',
+                'visitante': 'guest',
+                'guest': 'guest'
+            };
+
+            return aliases[value] || value || 'guest';
+        }
+
+        function getDisplayRole(userData, config) {
+            if (!userData) {
+                return config.rol;
+            }
+
+            const roleMap = {
+                guest: 'Sin registro',
+                vecino: 'Vecino',
+                cuadrilla: 'Cuadrilla de recolección',
+                operario: 'Operario de centro',
+                admin: 'Administrador municipal'
+            };
+
+            return roleMap[normalizeRoleKey(userData.role)] || config.rol;
+        }
+
         function renderRole(role, userData = null) {
-            const config = roles[role];
+            const resolvedRole = userData ? normalizeRoleKey(userData.role || role) : normalizeRoleKey(role);
+            const config = roles[resolvedRole] || roles.guest;
             const userPanel = document.getElementById('userPanel');
             const roleBanner = document.getElementById('roleBanner');
             const roleQuickActions = document.getElementById('roleQuickActions');
 
             const displayName = userData ? `${userData.nombre} ${userData.apellido}` : config.name;
             const displayInitials = userData ? `${(userData.nombre || '').charAt(0)}${(userData.apellido || '').charAt(0)}` : config.initials;
-            const displayRole = userData ? 'Vecino' : config.rol;
+            const displayRole = getDisplayRole(userData, config);
 
             userPanel.innerHTML = `
                 <div class="avatar">${displayInitials.toUpperCase()}</div>
@@ -362,17 +356,84 @@
             `).join('');
         }
 
-        document.getElementById('roleSelector').addEventListener('change', (event) => {
+        async function cargarMetricas() {
+            try {
+                const response = await fetch('../backend/api/dashboard.php');
+                const payload = await response.json();
+
+                if (!payload.success) {
+                    throw new Error(payload.message || 'No se pudieron cargar las métricas.');
+                }
+
+                const data = payload.data || {};
+                document.getElementById('metric-incidencias').textContent = data.incidencias_abiertas ?? 0;
+                document.getElementById('metric-contenedores').textContent = data.contenedores_activos ?? 0;
+                document.getElementById('metric-camiones').textContent = data.camiones_operativos ?? 0;
+                document.getElementById('metric-toneladas').textContent = `${Number(data.toneladas_recolectadas ?? 0).toFixed(2)}T`;
+
+                const activityList = document.getElementById('activityList');
+                const activities = Array.isArray(data.recent_activity) ? data.recent_activity : [];
+                activityList.innerHTML = activities.length
+                    ? activities.map((item) => `<li>${item.text}</li>`).join('')
+                    : '<li>No hay actividad reciente registrada.</li>';
+
+                const contenedoresBody = document.getElementById('contenedoresTableBody');
+                const contenedores = Array.isArray(data.contenedores) ? data.contenedores : [];
+                contenedoresBody.innerHTML = contenedores.length
+                    ? contenedores.map((contenedor) => `
+                        <tr>
+                            <td>#${contenedor.id}</td>
+                            <td>${contenedor.zona || 'Sin zona'}</td>
+                            <td>${contenedor.estado || '-'}</td>
+                        </tr>
+                    `).join('')
+                    : '<tr><td colspan="3" class="tabla-vacia">No hay contenedores registrados.</td></tr>';
+
+                const camionesBody = document.getElementById('camionesTableBody');
+                const camiones = Array.isArray(data.camiones) ? data.camiones : [];
+                camionesBody.innerHTML = camiones.length
+                    ? camiones.map((camion) => `
+                        <tr>
+                            <td>${camion.matricula || 'Sin matrícula'}</td>
+                            <td>${camion.estado || '-'}</td>
+                        </tr>
+                    `).join('')
+                    : '<tr><td colspan="2" class="tabla-vacia">No hay camiones registrados.</td></tr>';
+
+                if (window.cerberoMap && window.cerberoMapMarkers) {
+                    window.cerberoMapMarkers.clearLayers();
+                    contenedores.filter((contenedor) => contenedor.latitud != null && contenedor.longitud != null).forEach((contenedor) => {
+                        const marker = L.marker([contenedor.latitud, contenedor.longitud]).addTo(window.cerberoMapMarkers);
+                        marker.bindPopup(`<b>Contenedor #${contenedor.id}</b><br>${contenedor.estado || '-'}`);
+                    });
+                }
+            } catch (error) {
+                document.getElementById('metric-incidencias').textContent = '0';
+                document.getElementById('metric-contenedores').textContent = '0';
+                document.getElementById('metric-camiones').textContent = '0';
+                document.getElementById('metric-toneladas').textContent = '0.00T';
+                document.getElementById('activityList').innerHTML = '<li>No hay actividad reciente registrada.</li>';
+                document.getElementById('contenedoresTableBody').innerHTML = '<tr><td colspan="3" class="tabla-vacia">No hay contenedores registrados.</td></tr>';
+                document.getElementById('camionesTableBody').innerHTML = '<tr><td colspan="2" class="tabla-vacia">No hay camiones registrados.</td></tr>';
+            }
+        }
+
+        const roleSelector = document.getElementById('roleSelector');
+        roleSelector.addEventListener('change', (event) => {
             renderRole(event.target.value);
         });
 
         const savedUser = JSON.parse(localStorage.getItem('cerberoUser') || 'null');
         if (savedUser) {
-            renderRole('vecino', savedUser);
-            document.getElementById('roleSelector').value = 'vecino';
+            const actualRole = normalizeRoleKey(savedUser.role);
+            renderRole(actualRole, savedUser);
+            roleSelector.value = actualRole;
         } else {
             renderRole('guest');
+            roleSelector.value = 'guest';
         }
+
+        cargarMetricas();
     </script>
 <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -380,26 +441,14 @@
             const mapElement = document.getElementById('mapaInteractivo');
             if (!mapElement) return;
 
-            // Inicializar el mapa (Coordenadas de Montevideo/Ejemplo: -34.9011, -56.1645)
             const map = L.map('mapaInteractivo').setView([-34.9011, -56.1645], 13);
+            window.cerberoMap = map;
+            window.cerberoMapMarkers = L.layerGroup().addTo(map);
 
-            // Cargar capa de OpenStreetMap
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '&copy; OpenStreetMap'
             }).addTo(map);
-
-            // Ejemplo de marcadores/contenedores
-            const contenedores = [
-                { lat: -34.9011, lng: -56.1645, estado: 'Normal', tipo: 'Residuos Orgánicos' },
-                { lat: -34.9050, lng: -56.1600, estado: 'Lleno', tipo: 'Plásticos y Reciclables' }
-            ];
-
-            contenedores.forEach(c => {
-                L.marker([c.lat, c.lng])
-                    .addTo(map)
-                    .bindPopup(`<b>Tipo:</b> ${c.tipo}<br><b>Estado:</b> ${c.estado}`);
-            });
         });
     </script>
 </body>

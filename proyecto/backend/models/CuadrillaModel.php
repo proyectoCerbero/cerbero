@@ -33,17 +33,33 @@ class CuadrillaModel
 
     public function create(array $data): array
     {
-        $stmt = $this->pdo->prepare(
-            'INSERT INTO cuadrilla (nombre, turno, estado) VALUES (?, ?, ?)'
-        );
-        $stmt->execute([
-            $data['nombre'],
-            $data['turno'],
-            $data['estado'],
-        ]);
+        $attempts = 0;
 
-        $id = (int) $this->pdo->lastInsertId();
+        while ($attempts < 3) {
+            try {
+                $stmt = $this->pdo->prepare(
+                    'INSERT INTO cuadrilla (nombre, turno, estado) VALUES (?, ?, ?)'
+                );
+                $stmt->execute([
+                    $data['nombre'],
+                    $data['turno'],
+                    $data['estado'],
+                ]);
 
-        return $this->findById($id) ?? [];
+                $id = (int) $this->pdo->lastInsertId();
+
+                return $this->findById($id) ?? [];
+            } catch (PDOException $e) {
+                if (strpos($e->getMessage(), '1213') !== false || strpos($e->getMessage(), 'deadlock') !== false) {
+                    $attempts++;
+                    usleep(250000);
+                    continue;
+                }
+
+                throw $e;
+            }
+        }
+
+        throw new RuntimeException('No se pudo crear la cuadrilla después de varios intentos por conflictos de base de datos.');
     }
 }
