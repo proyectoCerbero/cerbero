@@ -24,7 +24,7 @@
                     <a href="index.html">Dashboard</a>
                     <a href="gestion.html">Gestión</a>
                     <a href="#">Contenedores</a>
-                    <a href="#">Camiones</a>
+                    <a href="#seccionCamiones">Camiones</a>
                     <a href="#">Incidencias</a>
                     <a href="#">Instalaciones</a>
                     <a href="#">Rutas</a>
@@ -118,6 +118,83 @@
                     </thead>
                     <tbody id="cuadrillasTablaBody">
                         <tr><td colspan="4" class="tabla-vacia">Cargando cuadrillas...</td></tr>
+                    </tbody>
+                </table>
+
+            </section>
+
+            <section class="gestion-seccion" id="seccionCamiones">
+
+                <h2>Camiones</h2>
+                <div id="camionesStatus" class="gestion-status"></div>
+
+                <form id="crearCamionForm" class="form-cuadrilla">
+
+                    <div>
+                        <label for="camionMatricula">Matrícula</label>
+                        <input type="text" id="camionMatricula" name="matricula" placeholder="Ej: SBA1234" required>
+                    </div>
+
+                    <div>
+                        <label for="camionMarca">Marca</label>
+                        <input type="text" id="camionMarca" name="marca" placeholder="Ej: Volvo" required>
+                    </div>
+
+                    <div>
+                        <label for="camionModelo">Modelo</label>
+                        <input type="text" id="camionModelo" name="modelo" placeholder="Ej: FMX 380" required>
+                    </div>
+
+                    <div>
+                        <label for="camionAnio">Año</label>
+                        <input type="number" id="camionAnio" name="anio" placeholder="Ej: 2020" min="1950" required>
+                    </div>
+
+                    <div>
+                        <label for="camionKilometraje">Kilometraje</label>
+                        <input type="number" id="camionKilometraje" name="kilometraje" placeholder="0" min="0">
+                    </div>
+
+                    <div>
+                        <label for="camionCapacidad">Capacidad (m³)</label>
+                        <input type="number" id="camionCapacidad" name="capacidad" placeholder="0" min="0" step="0.1">
+                    </div>
+
+                    <div>
+                        <label for="camionEstado">Estado</label>
+                        <select id="camionEstado" name="estado">
+                            <option value="activo">Activo</option>
+                            <option value="mantenimiento">Mantenimiento</option>
+                            <option value="inactivo">Inactivo</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="camionCuadrilla">Cuadrilla asignada</label>
+                        <select id="camionCuadrilla" name="id_cuadrilla">
+                            <option value="">Sin asignar</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" id="crearCamionBtn">Crear camión</button>
+
+                </form>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Matrícula</th>
+                            <th>Marca / Modelo</th>
+                            <th>Año</th>
+                            <th>Km</th>
+                            <th>Capacidad</th>
+                            <th>Estado</th>
+                            <th>Cuadrilla</th>
+                        </tr>
+                    </thead>
+                    <tbody id="camionesTablaBody">
+                        <tr><td colspan="8" class="tabla-vacia">Cargando camiones...</td></tr>
                     </tbody>
                 </table>
 
