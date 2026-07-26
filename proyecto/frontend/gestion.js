@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const USUARIOS_URL = new URL('../backend/api/usuarios.php', window.location.href).toString();
     const CUADRILLAS_URL = new URL('../backend/api/cuadrillas.php', window.location.href).toString();
+    const CAMIONES_URL = new URL('../backend/api/camiones.php', window.location.href).toString();
 
     const ROLES = ['vecino', 'cuadrilla', 'operario', 'admin'];
     const ESTADOS_USUARIO = ['activo', 'inactivo', 'suspendido'];
@@ -11,6 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const cuadrillasBody = document.getElementById('cuadrillasTablaBody');
     const crearCuadrillaForm = document.getElementById('crearCuadrillaForm');
     const crearCuadrillaBtn = document.getElementById('crearCuadrillaBtn');
+
+    const camionesStatus = document.getElementById('camionesStatus');
+    const camionesBody = document.getElementById('camionesTablaBody');
+    const crearCamionForm = document.getElementById('crearCamionForm');
+    const crearCamionBtn = document.getElementById('crearCamionBtn');
+    const camionCuadrillaSelect = document.getElementById('camionCuadrilla');
 
     const showStatus = (el, message, isError = false) => {
         el.textContent = message;
@@ -143,17 +150,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderCuadrillas = (cuadrillas) => {
         if (!cuadrillas.length) {
             cuadrillasBody.innerHTML = '<tr><td colspan="4" class="tabla-vacia">No hay cuadrillas creadas todavía.</td></tr>';
-            return;
+        } else {
+            cuadrillasBody.innerHTML = cuadrillas.map((cuadrilla) => `
+                <tr>
+                    <td>${cuadrilla.id_cuadrilla}</td>
+                    <td>${cuadrilla.nombre}</td>
+                    <td>${cuadrilla.turno ?? '-'}</td>
+                    <td>${cuadrilla.estado ?? '-'}</td>
+                </tr>
+            `).join('');
         }
 
-        cuadrillasBody.innerHTML = cuadrillas.map((cuadrilla) => `
-            <tr>
-                <td>${cuadrilla.id_cuadrilla}</td>
-                <td>${cuadrilla.nombre}</td>
-                <td>${cuadrilla.turno ?? '-'}</td>
-                <td>${cuadrilla.estado ?? '-'}</td>
-            </tr>
-        `).join('');
+        // Mantiene sincronizado el <select> de cuadrillas del formulario de camiones.
+        if (camionCuadrillaSelect) {
+            const seleccionActual = camionCuadrillaSelect.value;
+            const opciones = cuadrillas.map((cuadrilla) => (
+                `<option value="${cuadrilla.id_cuadrilla}">${cuadrilla.nombre}</option>`
+            )).join('');
+            camionCuadrillaSelect.innerHTML = `<option value="">Sin asignar</option>${opciones}`;
+            camionCuadrillaSelect.value = seleccionActual;
+        }
     };
 
     const cargarCuadrillas = async () => {
@@ -202,6 +218,89 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // ---------- CAMIONES ----------
+
+    const renderCamiones = (camiones) => {
+        if (!camiones.length) {
+            camionesBody.innerHTML = '<tr><td colspan="8" class="tabla-vacia">No hay camiones registrados todavía.</td></tr>';
+            return;
+        }
+
+        camionesBody.innerHTML = camiones.map((camion) => `
+            <tr>
+                <td>${camion.id_camion}</td>
+                <td>${camion.matricula}</td>
+                <td>${camion.marca} ${camion.modelo}</td>
+                <td>${camion.anio}</td>
+                <td>${camion.kilometraje ?? 0}</td>
+                <td>${camion.capacidad ?? 0}</td>
+                <td><span class="badge ${camion.estado === 'activo' ? 'badge-activo' : (camion.estado === 'mantenimiento' ? 'badge-inactivo' : 'badge-suspendido')}">${camion.estado ?? '-'}</span></td>
+                <td>${camion.cuadrilla_nombre ?? 'Sin asignar'}</td>
+            </tr>
+        `).join('');
+    };
+
+    const cargarCamiones = async () => {
+        try {
+            const result = await fetchJson(CAMIONES_URL);
+            if (!result.success) throw new Error(result.message);
+            renderCamiones(result.data.camiones || []);
+        } catch (error) {
+            camionesBody.innerHTML = '<tr><td colspan="8" class="tabla-vacia">No se pudieron cargar los camiones.</td></tr>';
+            showStatus(camionesStatus, error.message || 'Error al cargar camiones.', true);
+        }
+    };
+
+    crearCamionForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const matricula = document.getElementById('camionMatricula').value.trim();
+        const marca = document.getElementById('camionMarca').value.trim();
+        const modelo = document.getElementById('camionModelo').value.trim();
+        const anio = document.getElementById('camionAnio').value;
+        const kilometraje = document.getElementById('camionKilometraje').value || 0;
+        const capacidad = document.getElementById('camionCapacidad').value || 0;
+        const estado = document.getElementById('camionEstado').value;
+        const idCuadrilla = camionCuadrillaSelect.value;
+
+        if (!matricula || !marca || !modelo || !anio) {
+            showStatus(camionesStatus, 'Matrícula, marca, modelo y año son obligatorios.', true);
+            return;
+        }
+
+        crearCamionBtn.disabled = true;
+        showStatus(camionesStatus, 'Creando camión...');
+
+        try {
+            const result = await fetchJson(CAMIONES_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    matricula,
+                    marca,
+                    modelo,
+                    anio: Number(anio),
+                    kilometraje: Number(kilometraje),
+                    capacidad: Number(capacidad),
+                    estado,
+                    id_cuadrilla: idCuadrilla || null
+                })
+            });
+
+            showStatus(camionesStatus, result.message, !result.success);
+
+            if (result.success) {
+                crearCamionForm.reset();
+                await cargarCamiones();
+            }
+        } catch (error) {
+            showStatus(camionesStatus, error.message || 'No se pudo crear el camión.', true);
+        } finally {
+            crearCamionBtn.disabled = false;
+        }
+    });
+
     cargarUsuarios();
     cargarCuadrillas();
+    cargarCamiones();
 });
