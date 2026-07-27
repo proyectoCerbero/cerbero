@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS camion (
     kilometraje INT,
     capacidad DECIMAL(8,2),
     estado VARCHAR(30),
+    disponibilidad BOOLEAN NOT NULL DEFAULT TRUE,
     id_cuadrilla INT,
     FOREIGN KEY (id_cuadrilla) REFERENCES cuadrilla(id_cuadrilla)
 );
@@ -163,9 +164,11 @@ CREATE TABLE IF NOT EXISTS traslado_residuo (
     id_camion INT,
     id_tipo_residuo INT,
     id_instalacion INT,
+    id_cuadrilla INT,
     FOREIGN KEY (id_camion) REFERENCES camion(id_camion),
     FOREIGN KEY (id_tipo_residuo) REFERENCES tipo_residuo(id_tipo_residuo),
-    FOREIGN KEY (id_instalacion) REFERENCES instalacion(id_instalacion)
+    FOREIGN KEY (id_instalacion) REFERENCES instalacion(id_instalacion),
+    FOREIGN KEY (id_cuadrilla) REFERENCES cuadrilla(id_cuadrilla)
 );
 
 CREATE TABLE IF NOT EXISTS repuesto (
@@ -198,12 +201,19 @@ CREATE TABLE IF NOT EXISTS ruta_recoleccion (
     nombre VARCHAR(100),
     frecuencia VARCHAR(50),
     distancia DECIMAL(8,2),
-    estado VARCHAR(30),
+    estado VARCHAR(30)
+);
+
+CREATE TABLE IF NOT EXISTS cuadrilla_ruta (
+    id_cuadrilla INT,
+    id_ruta INT,
+    fecha DATE,
     hora_inicio TIME,
     hora_fin TIME,
-    fecha DATE,
-    id_cuadrilla INT,
-    FOREIGN KEY (id_cuadrilla) REFERENCES cuadrilla(id_cuadrilla)
+    estado VARCHAR(30),
+    PRIMARY KEY (id_cuadrilla, id_ruta, fecha),
+    FOREIGN KEY (id_cuadrilla) REFERENCES cuadrilla(id_cuadrilla),
+    FOREIGN KEY (id_ruta) REFERENCES ruta_recoleccion(id_ruta)
 );
 
 CREATE TABLE IF NOT EXISTS tipo_reparacion (
