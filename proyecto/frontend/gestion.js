@@ -1,7 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const USUARIOS_URL = new URL('../backend/api/usuarios.php', window.location.href).toString();
-    const CUADRILLAS_URL = new URL('../backend/api/cuadrillas.php', window.location.href).toString();
-    const CAMIONES_URL = new URL('../backend/api/camiones.php', window.location.href).toString();
+    const API_BASE = '../backend/api';
+    const USUARIOS_URL = new URL(`${API_BASE}/usuarios.php`, window.location.href).toString();
+    const CUADRILLAS_URL = new URL(`${API_BASE}/cuadrillas.php`, window.location.href).toString();
+    const CAMIONES_URL = new URL(`${API_BASE}/camiones.php`, window.location.href).toString();
+    const CONTENEDORES_URL = new URL(`${API_BASE}/contenedores.php`, window.location.href).toString();
+    const INSTALACIONES_URL = new URL(`${API_BASE}/instalaciones.php`, window.location.href).toString();
+    const MAQUINARIA_URL = new URL(`${API_BASE}/maquinaria.php`, window.location.href).toString();
 
     const ROLE_OPTIONS = [
         { value: 'vecino', label: 'Vecino' },
@@ -9,366 +13,261 @@ document.addEventListener('DOMContentLoaded', () => {
         { value: 'operario de centro', label: 'Operario de centro' },
         { value: 'administrador municipal', label: 'Administrador municipal' }
     ];
-    const ESTADOS_USUARIO = ['activo', 'inactivo', 'suspendido'];
-
-    const usuariosStatus = document.getElementById('usuariosStatus');
-    const usuariosBody = document.getElementById('usuariosTablaBody');
-    const cuadrillasStatus = document.getElementById('cuadrillasStatus');
-    const cuadrillasBody = document.getElementById('cuadrillasTablaBody');
-    const crearCuadrillaForm = document.getElementById('crearCuadrillaForm');
-    const crearCuadrillaBtn = document.getElementById('crearCuadrillaBtn');
-
-    const camionesStatus = document.getElementById('camionesStatus');
-    const camionesBody = document.getElementById('camionesTablaBody');
-    const crearCamionForm = document.getElementById('crearCamionForm');
-    const crearCamionBtn = document.getElementById('crearCamionBtn');
-    const camionCuadrillaSelect = document.getElementById('camionCuadrilla');
 
     const currentUser = JSON.parse(localStorage.getItem('cerberoUser') || 'null');
     const viewSelector = document.getElementById('gestionViewSelector');
-    const isExampleAdminView = () => viewSelector?.value === 'admin';
-    const isCurrentUserAdmin = () => isExampleAdminView() || String(currentUser?.role || '').trim().toLowerCase() === 'administrador municipal' || String(currentUser?.role || '').trim().toLowerCase() === 'admin';
-
-    const normalizeRoleValue = (roleName) => {
-        const value = String(roleName || '').trim().toLowerCase();
-        if (['admin', 'administrador', 'administrador municipal'].includes(value)) return 'administrador municipal';
-        if (['cuadrilla', 'cuadrilla de recoleccion', 'cuadrilla de recolección'].includes(value)) return 'cuadrilla de recolección';
-        if (['operario', 'operario de centro'].includes(value)) return 'operario de centro';
-        if (value === 'vecino') return 'vecino';
-        return value;
-    };
+    const isCurrentUserAdmin = () => viewSelector?.value === 'admin' || String(currentUser?.role || '').trim().toLowerCase().includes('admin');
 
     const showStatus = (el, message, isError = false) => {
         el.textContent = message;
         el.style.color = isError ? 'crimson' : 'green';
+        setTimeout(() => el.textContent = '', 4000);
     };
 
     const fetchJson = async (url, init) => {
         const response = await fetch(url, init);
         const text = await response.text();
-
-        let payload = null;
         try {
-            payload = text ? JSON.parse(text) : null;
+            return text ? JSON.parse(text) : null;
         } catch (error) {
-            throw new Error(`Respuesta no válida del servidor (${response.status}): ${text}`);
+            throw new Error(`Error del servidor (${response.status})`);
         }
-
-        if (!payload) {
-            throw new Error(`El servidor respondió ${response.status} sin contenido.`);
-        }
-
-        return payload;
     };
 
-    // ---------- USUARIOS ----------
+    const genericDelete = async (url, id, idField, statusElement, refreshCallback) => {
+        if (!confirm('¿Estás seguro de eliminar este registro?')) return;
+        try {
+            const result = await fetchJson(`${url}?action=delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ [idField]: id })
+            });
+            showStatus(statusElement, result.message || 'Eliminado con éxito', !result.success);
+            if (result.success) await refreshCallback();
+        } catch (error) {
+            showStatus(statusElement, 'Error al eliminar', true);
+        }
+    };
+
+    // ---------- CARGA DE DATOS (CRUD READ) ----------
+
+    const cargarDatos = async () => {
+        try {
+            const [users, cuadrillas, camiones, contenedores, instalaciones, maquinaria] = await Promise.all([
+                fetchJson(USUARIOS_URL).catch(() => ({ success: false, data: { usuarios: [] } })),
+                fetchJson(CUADRILLAS_URL).catch(() => ({ success: false, data: { cuadrillas: [] } })),
+                fetchJson(CAMIONES_URL).catch(() => ({ success: false, data: { camiones: [] } })),
+                fetchJson(CONTENEDORES_URL).catch(() => ({ success: false, data: { contenedores: [] } })),
+                fetchJson(INSTALACIONES_URL).catch(() => ({ success: false, data: { instalaciones: [] } })),
+                fetchJson(MAQUINARIA_URL).catch(() => ({ success: false, data: { maquinaria: [] } }))
+            ]);
+
+            renderUsuarios(users.data?.usuarios || []);
+            renderCuadrillas(cuadrillas.data?.cuadrillas || []);
+            renderCamiones(camiones.data?.camiones || []);
+            renderContenedores(contenedores.data?.contenedores || []);
+            renderInstalaciones(instalaciones.data?.instalaciones || []);
+            renderMaquinaria(maquinaria.data?.maquinaria || []);
+
+            // Llenar select de cuadrillas en formulario de camiones
+            const camionCuadrillaSelect = document.getElementById('camionCuadrilla');
+            if (camionCuadrillaSelect) {
+                camionCuadrillaSelect.innerHTML = '<option value="">Sin asignar</option>' + 
+                    (cuadrillas.data?.cuadrillas || []).map(c => `<option value="${c.id_cuadrilla}">${c.nombre}</option>`).join('');
+            }
+        } catch (error) {
+            console.error('Error al cargar datos generales', error);
+        }
+    };
+
+    // ---------- RENDERIZADOS DE TABLAS ----------
 
     const renderUsuarios = (usuarios) => {
-        if (!usuarios.length) {
-            usuariosBody.innerHTML = '<tr><td colspan="6" class="tabla-vacia">No hay usuarios registrados todavía.</td></tr>';
-            return;
-        }
-
-        usuariosBody.innerHTML = usuarios.map((usuario) => {
-            const rolActual = normalizeRoleValue(usuario.role || 'vecino');
-            const estadoActual = usuario.estado || 'activo';
-            const badgeClass = estadoActual === 'activo' ? 'badge-activo' : (estadoActual === 'suspendido' ? 'badge-suspendido' : 'badge-inactivo');
-            const proximoEstado = estadoActual === 'activo' ? 'inactivo' : 'activo';
-            const textoBoton = estadoActual === 'activo' ? 'Desactivar' : 'Activar';
-            const claseBoton = estadoActual === 'activo' ? 'btn-accion peligro' : 'btn-accion';
-            const opcionesRol = ROLE_OPTIONS.map((rol) => (
-                `<option value="${rol.value}" ${rol.value === rolActual ? 'selected' : ''}>${rol.label}</option>`
-            )).join('');
-            const puedeEditarRol = isCurrentUserAdmin();
-            const puedeCambiarEstado = isCurrentUserAdmin();
-
-            return `
-                <tr data-ci="${usuario.ci}">
-                    <td>${usuario.ci}</td>
-                    <td>${usuario.nombre} ${usuario.apellido}</td>
-                    <td>${usuario.email}</td>
-                    <td>
-                        ${puedeEditarRol
-                            ? `<select class="rol-select">${opcionesRol}</select>`
-                            : `<span class="badge">${ROLE_OPTIONS.find((rol) => rol.value === rolActual)?.label || rolActual}</span>`}
-                    </td>
-                    <td><span class="badge ${badgeClass}">${estadoActual}</span></td>
-                    <td>
-                        <div class="acciones-cell">
-                            ${puedeEditarRol ? '<button type="button" class="btn-accion btn-guardar-rol">Guardar rol</button>' : ''}
-                            ${puedeCambiarEstado
-                                ? `<button type="button" class="${claseBoton} btn-toggle-estado" data-proximo-estado="${proximoEstado}">${textoBoton}</button>`
-                                : ''}
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }).join('');
+        const body = document.getElementById('usuariosTablaBody');
+        body.innerHTML = usuarios.length ? usuarios.map(u => `
+            <tr data-ci="${u.ci}">
+                <td>${u.ci}</td>
+                <td>${u.nombre} ${u.apellido}</td>
+                <td>${u.email}</td>
+                <td>${isCurrentUserAdmin() ? `<select class="rol-select">${ROLE_OPTIONS.map(r => `<option value="${r.value}" ${r.value === u.role ? 'selected' : ''}>${r.label}</option>`).join('')}</select>` : u.role}</td>
+                <td><span class="badge ${u.estado === 'activo' ? 'badge-activo' : 'badge-inactivo'}">${u.estado}</span></td>
+                <td>
+                    ${isCurrentUserAdmin() ? `
+                        <button class="btn-accion btn-guardar-rol">Guardar Rol</button>
+                        <button class="btn-accion peligro btn-toggle-estado" data-estado="${u.estado === 'activo' ? 'inactivo' : 'activo'}">${u.estado === 'activo' ? 'Desactivar' : 'Activar'}</button>
+                    ` : '-'}
+                </td>
+            </tr>
+        `).join('') : '<tr><td colspan="6">No hay usuarios.</td></tr>';
     };
-
-    const cargarUsuarios = async () => {
-        try {
-            const result = await fetchJson(USUARIOS_URL);
-            if (!result.success) throw new Error(result.message);
-            renderUsuarios(result.data.usuarios || []);
-        } catch (error) {
-            usuariosBody.innerHTML = '<tr><td colspan="6" class="tabla-vacia">No se pudieron cargar los usuarios.</td></tr>';
-            showStatus(usuariosStatus, error.message || 'Error al cargar usuarios.', true);
-        }
-    };
-
-    usuariosBody.addEventListener('click', async (event) => {
-        const fila = event.target.closest('tr[data-ci]');
-        if (!fila) return;
-        const ci = fila.dataset.ci;
-
-        // Botón: guardar rol seleccionado
-        if (event.target.classList.contains('btn-guardar-rol')) {
-            if (!isCurrentUserAdmin()) {
-                showStatus(usuariosStatus, 'Solo un administrador puede cambiar roles.', true);
-                return;
-            }
-
-            const rolSeleccionado = fila.querySelector('.rol-select').value;
-            const boton = event.target;
-            boton.disabled = true;
-            showStatus(usuariosStatus, 'Actualizando rol...');
-
-            try {
-                const result = await fetchJson(`${USUARIOS_URL}?action=rol`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ci, rol: rolSeleccionado, requester_role: currentUser?.role || '' })
-                });
-
-                showStatus(usuariosStatus, result.message, !result.success);
-                if (result.success) await cargarUsuarios();
-            } catch (error) {
-                showStatus(usuariosStatus, error.message || 'No se pudo actualizar el rol.', true);
-            } finally {
-                boton.disabled = false;
-            }
-        }
-
-        // Botón: activar/desactivar
-        if (event.target.classList.contains('btn-toggle-estado')) {
-            if (!isCurrentUserAdmin()) {
-                showStatus(usuariosStatus, 'Solo un administrador puede activar o desactivar usuarios.', true);
-                return;
-            }
-
-            const boton = event.target;
-            const proximoEstado = boton.dataset.proximoEstado;
-            boton.disabled = true;
-            showStatus(usuariosStatus, 'Actualizando estado...');
-
-            try {
-                const result = await fetchJson(`${USUARIOS_URL}?action=estado`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ci, estado: proximoEstado })
-                });
-
-                showStatus(usuariosStatus, result.message, !result.success);
-                if (result.success) await cargarUsuarios();
-            } catch (error) {
-                showStatus(usuariosStatus, error.message || 'No se pudo actualizar el estado.', true);
-            } finally {
-                boton.disabled = false;
-            }
-        }
-    });
-
-    // ---------- CUADRILLAS ----------
 
     const renderCuadrillas = (cuadrillas) => {
-        if (!cuadrillas.length) {
-            cuadrillasBody.innerHTML = '<tr><td colspan="4" class="tabla-vacia">No hay cuadrillas creadas todavía.</td></tr>';
-        } else {
-            cuadrillasBody.innerHTML = cuadrillas.map((cuadrilla) => `
-                <tr>
-                    <td>${cuadrilla.id_cuadrilla}</td>
-                    <td>${cuadrilla.nombre}</td>
-                    <td>${cuadrilla.turno ?? '-'}</td>
-                    <td>${cuadrilla.estado ?? '-'}</td>
-                </tr>
-            `).join('');
-        }
-
-        if (crearCuadrillaForm) {
-            crearCuadrillaForm.style.display = isCurrentUserAdmin() ? 'grid' : 'none';
-        }
-        if (crearCuadrillaBtn) {
-            crearCuadrillaBtn.disabled = !isCurrentUserAdmin();
-        }
-
-        // Mantiene sincronizado el <select> de cuadrillas del formulario de camiones.
-        if (camionCuadrillaSelect) {
-            const seleccionActual = camionCuadrillaSelect.value;
-            const opciones = cuadrillas.map((cuadrilla) => (
-                `<option value="${cuadrilla.id_cuadrilla}">${cuadrilla.nombre}</option>`
-            )).join('');
-            camionCuadrillaSelect.innerHTML = `<option value="">Sin asignar</option>${opciones}`;
-            camionCuadrillaSelect.value = seleccionActual;
-        }
+        document.getElementById('cuadrillasTablaBody').innerHTML = cuadrillas.length ? cuadrillas.map(c => `
+            <tr>
+                <td>${c.id_cuadrilla}</td><td>${c.nombre}</td><td>${c.turno}</td><td>${c.estado}</td>
+                <td>${isCurrentUserAdmin() ? `<button class="btn-accion peligro" onclick="genericDelete('${CUADRILLAS_URL}', ${c.id_cuadrilla}, 'id_cuadrilla', document.getElementById('cuadrillasStatus'), cargarDatos)">Eliminar</button>` : '-'}</td>
+            </tr>
+        `).join('') : '<tr><td colspan="5">No hay cuadrillas.</td></tr>';
+        document.getElementById('crearCuadrillaForm').style.display = isCurrentUserAdmin() ? 'grid' : 'none';
     };
-
-    const cargarCuadrillas = async () => {
-        try {
-            const result = await fetchJson(CUADRILLAS_URL);
-            if (!result.success) throw new Error(result.message);
-            renderCuadrillas(result.data.cuadrillas || []);
-        } catch (error) {
-            cuadrillasBody.innerHTML = '<tr><td colspan="4" class="tabla-vacia">No se pudieron cargar las cuadrillas.</td></tr>';
-            showStatus(cuadrillasStatus, error.message || 'Error al cargar cuadrillas.', true);
-        }
-    };
-
-    crearCuadrillaForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        if (!isCurrentUserAdmin()) {
-            showStatus(cuadrillasStatus, 'Solo un administrador puede crear cuadrillas.', true);
-            return;
-        }
-
-        const nombre = document.getElementById('cuadrillaNombre').value.trim();
-        const turno = document.getElementById('cuadrillaTurno').value;
-        const estado = document.getElementById('cuadrillaEstado').value;
-
-        if (!nombre) {
-            showStatus(cuadrillasStatus, 'El nombre de la cuadrilla es obligatorio.', true);
-            return;
-        }
-
-        crearCuadrillaBtn.disabled = true;
-        showStatus(cuadrillasStatus, 'Creando cuadrilla...');
-
-        try {
-            const result = await fetchJson(CUADRILLAS_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre, turno, estado })
-            });
-
-            showStatus(cuadrillasStatus, result.message, !result.success);
-
-            if (result.success) {
-                crearCuadrillaForm.reset();
-                await cargarCuadrillas();
-            }
-        } catch (error) {
-            showStatus(cuadrillasStatus, error.message || 'No se pudo crear la cuadrilla.', true);
-        } finally {
-            crearCuadrillaBtn.disabled = false;
-        }
-    });
-
-    // ---------- CAMIONES ----------
 
     const renderCamiones = (camiones) => {
-        if (!camiones.length) {
-            camionesBody.innerHTML = '<tr><td colspan="8" class="tabla-vacia">No hay camiones registrados todavía.</td></tr>';
-        } else {
-            camionesBody.innerHTML = camiones.map((camion) => `
-                <tr>
-                    <td>${camion.id_camion}</td>
-                    <td>${camion.matricula}</td>
-                    <td>${camion.marca} ${camion.modelo}</td>
-                    <td>${camion.anio}</td>
-                    <td>${camion.kilometraje ?? 0}</td>
-                    <td>${camion.capacidad ?? 0}</td>
-                    <td><span class="badge ${camion.estado === 'activo' ? 'badge-activo' : (camion.estado === 'mantenimiento' ? 'badge-inactivo' : 'badge-suspendido')}">${camion.estado ?? '-'}</span></td>
-                    <td>${camion.cuadrilla_nombre ?? 'Sin asignar'}</td>
-                </tr>
-            `).join('');
-        }
-
-        if (crearCamionForm) {
-            crearCamionForm.style.display = isCurrentUserAdmin() ? 'grid' : 'none';
-        }
-        if (crearCamionBtn) {
-            crearCamionBtn.disabled = !isCurrentUserAdmin();
-        }
-        if (camionCuadrillaSelect) {
-            camionCuadrillaSelect.disabled = !isCurrentUserAdmin();
-        }
+        document.getElementById('camionesTablaBody').innerHTML = camiones.length ? camiones.map(c => `
+            <tr>
+                <td>${c.matricula}</td><td>${c.marca} ${c.modelo}</td><td>${c.anio}</td><td>${c.capacidad}</td><td>${c.estado}</td><td>${c.cuadrilla_nombre || '-'}</td>
+                <td>${isCurrentUserAdmin() ? `<button class="btn-accion peligro" onclick="genericDelete('${CAMIONES_URL}', ${c.id_camion}, 'id_camion', document.getElementById('camionesStatus'), cargarDatos)">Eliminar</button>` : '-'}</td>
+            </tr>
+        `).join('') : '<tr><td colspan="7">No hay camiones.</td></tr>';
+        document.getElementById('crearCamionForm').style.display = isCurrentUserAdmin() ? 'grid' : 'none';
     };
 
-    const cargarCamiones = async () => {
-        try {
-            const result = await fetchJson(CAMIONES_URL);
-            if (!result.success) throw new Error(result.message);
-            renderCamiones(result.data.camiones || []);
-        } catch (error) {
-            camionesBody.innerHTML = '<tr><td colspan="8" class="tabla-vacia">No se pudieron cargar los camiones.</td></tr>';
-            showStatus(camionesStatus, error.message || 'Error al cargar camiones.', true);
-        }
+    const renderContenedores = (contenedores) => {
+        document.getElementById('contenedoresTablaBody').innerHTML = contenedores.length ? contenedores.map(c => `
+            <tr>
+                <td>${c.id_contenedor}</td><td>${c.capacidad} L</td><td>${c.nivel_llenado}%</td><td>${c.estado}</td><td>Ubic: ${c.id_ubicacion}</td>
+                <td>${isCurrentUserAdmin() ? `<button class="btn-accion peligro" onclick="genericDelete('${CONTENEDORES_URL}', ${c.id_contenedor}, 'id_contenedor', document.getElementById('contenedoresStatus'), cargarDatos)">Eliminar</button>` : '-'}</td>
+            </tr>
+        `).join('') : '<tr><td colspan="6">No hay contenedores.</td></tr>';
+        document.getElementById('crearContenedorForm').style.display = isCurrentUserAdmin() ? 'grid' : 'none';
     };
 
-    crearCamionForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
+    const renderInstalaciones = (instalaciones) => {
+        document.getElementById('instalacionesTablaBody').innerHTML = instalaciones.length ? instalaciones.map(i => `
+            <tr>
+                <td>${i.nombre}</td><td>${i.calle} ${i.numero}</td><td>${i.horario}</td><td>${i.capacidad} T</td><td>${i.estado}</td>
+                <td>${isCurrentUserAdmin() ? `<button class="btn-accion peligro" onclick="genericDelete('${INSTALACIONES_URL}', ${i.id_instalacion}, 'id_instalacion', document.getElementById('instalacionesStatus'), cargarDatos)">Eliminar</button>` : '-'}</td>
+            </tr>
+        `).join('') : '<tr><td colspan="6">No hay instalaciones.</td></tr>';
+        document.getElementById('crearInstalacionForm').style.display = isCurrentUserAdmin() ? 'grid' : 'none';
+    };
 
-        if (!isCurrentUserAdmin()) {
-            showStatus(camionesStatus, 'Solo un administrador puede crear camiones.', true);
-            return;
+    const renderMaquinaria = (maquinaria) => {
+        document.getElementById('maquinariaTablaBody').innerHTML = maquinaria.length ? maquinaria.map(m => `
+            <tr>
+                <td>${m.id_maquinaria}</td><td>${m.tipo}</td><td>${m.id_instalacion}</td><td>${m.estado}</td>
+                <td>${isCurrentUserAdmin() ? `<button class="btn-accion peligro" onclick="genericDelete('${MAQUINARIA_URL}', ${m.id_maquinaria}, 'id_maquinaria', document.getElementById('maquinariaStatus'), cargarDatos)">Eliminar</button>` : '-'}</td>
+            </tr>
+        `).join('') : '<tr><td colspan="5">No hay maquinaria registrada.</td></tr>';
+        document.getElementById('crearMaquinariaForm').style.display = isCurrentUserAdmin() ? 'grid' : 'none';
+    };
+
+    // ---------- EVENTOS FORMULARIOS (CRUD CREATE & UPDATE) ----------
+
+    // Eventos para la tabla de Usuarios (Editar Rol y Estado)
+    document.getElementById('usuariosTablaBody')?.addEventListener('click', async (e) => {
+        const tr = e.target.closest('tr');
+        if (!tr) return;
+        const ci = tr.dataset.ci;
+
+        if (e.target.classList.contains('btn-guardar-rol')) {
+            const nuevoRol = tr.querySelector('.rol-select').value;
+            try {
+                await fetchJson(`${USUARIOS_URL}?action=updateRole`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ci, role: nuevoRol }) });
+                showStatus(document.getElementById('usuariosStatus'), 'Rol actualizado');
+                cargarDatos();
+            } catch (error) { showStatus(document.getElementById('usuariosStatus'), 'Error al actualizar rol', true); }
         }
 
-        const matricula = document.getElementById('camionMatricula').value.trim();
-        const marca = document.getElementById('camionMarca').value.trim();
-        const modelo = document.getElementById('camionModelo').value.trim();
-        const anio = document.getElementById('camionAnio').value;
-        const kilometraje = document.getElementById('camionKilometraje').value || 0;
-        const capacidad = document.getElementById('camionCapacidad').value || 0;
-        const estado = document.getElementById('camionEstado').value;
-        const idCuadrilla = camionCuadrillaSelect.value;
-
-        if (!matricula || !marca || !modelo || !anio) {
-            showStatus(camionesStatus, 'Matrícula, marca, modelo y año son obligatorios.', true);
-            return;
-        }
-
-        crearCamionBtn.disabled = true;
-        showStatus(camionesStatus, 'Creando camión...');
-
-        try {
-            const result = await fetchJson(CAMIONES_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    matricula,
-                    marca,
-                    modelo,
-                    anio: Number(anio),
-                    kilometraje: Number(kilometraje),
-                    capacidad: Number(capacidad),
-                    estado,
-                    id_cuadrilla: idCuadrilla || null
-                })
-            });
-
-            showStatus(camionesStatus, result.message, !result.success);
-
-            if (result.success) {
-                crearCamionForm.reset();
-                await cargarCamiones();
-            }
-        } catch (error) {
-            showStatus(camionesStatus, error.message || 'No se pudo crear el camión.', true);
-        } finally {
-            crearCamionBtn.disabled = false;
+        if (e.target.classList.contains('btn-toggle-estado')) {
+            const nuevoEstado = e.target.dataset.estado;
+            try {
+                await fetchJson(`${USUARIOS_URL}?action=updateEstado`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ci, estado: nuevoEstado }) });
+                showStatus(document.getElementById('usuariosStatus'), 'Estado actualizado');
+                cargarDatos();
+            } catch (error) { showStatus(document.getElementById('usuariosStatus'), 'Error al actualizar estado', true); }
         }
     });
 
-    if (viewSelector) {
-        viewSelector.addEventListener('change', async () => {
-            await cargarUsuarios();
-            await cargarCuadrillas();
-            await cargarCamiones();
-        });
-    }
+    // Evento Crear Cuadrilla
+    document.getElementById('crearCuadrillaForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+            nombre: document.getElementById('cuadrillaNombre').value,
+            turno: document.getElementById('cuadrillaTurno').value,
+            estado: document.getElementById('cuadrillaEstado').value
+        };
+        try {
+            await fetchJson(CUADRILLAS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            e.target.reset();
+            cargarDatos();
+        } catch (error) { showStatus(document.getElementById('cuadrillasStatus'), 'Error al crear cuadrilla', true); }
+    });
 
-    cargarUsuarios();
-    cargarCuadrillas();
-    cargarCamiones();
+    // Evento Crear Camión
+    document.getElementById('crearCamionForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+            matricula: document.getElementById('camionMatricula').value,
+            marca: document.getElementById('camionMarca').value,
+            modelo: document.getElementById('camionModelo').value,
+            anio: document.getElementById('camionAnio').value,
+            kilometraje: document.getElementById('camionKilometraje').value,
+            capacidad: document.getElementById('camionCapacidad').value,
+            estado: document.getElementById('camionEstado').value,
+            id_cuadrilla: document.getElementById('camionCuadrilla').value
+        };
+        try {
+            await fetchJson(CAMIONES_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            e.target.reset();
+            cargarDatos();
+        } catch (error) { showStatus(document.getElementById('camionesStatus'), 'Error al crear camión', true); }
+    });
+
+    // Evento Crear Contenedor
+    document.getElementById('crearContenedorForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+            capacidad: document.getElementById('contCapacidad').value,
+            nivel_llenado: document.getElementById('contNivel').value || 0,
+            id_ubicacion: document.getElementById('contUbicacion').value,
+            id_tipo_residuo: document.getElementById('contTipoResiduo').value,
+            estado: document.getElementById('contEstado').value
+        };
+        try {
+            await fetchJson(CONTENEDORES_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            e.target.reset();
+            cargarDatos();
+        } catch (error) { showStatus(document.getElementById('contenedoresStatus'), 'Error al crear contenedor', true); }
+    });
+
+    // Evento Crear Instalación
+    document.getElementById('crearInstalacionForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+            nombre: document.getElementById('instNombre').value,
+            calle: document.getElementById('instCalle').value,
+            numero: document.getElementById('instNumero').value,
+            telefono: document.getElementById('instTelefono').value,
+            horario: document.getElementById('instHorario').value,
+            capacidad: document.getElementById('instCapacidad').value || 0,
+            estado: document.getElementById('instEstado').value
+        };
+        try {
+            await fetchJson(INSTALACIONES_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            e.target.reset();
+            cargarDatos();
+        } catch (error) { showStatus(document.getElementById('instalacionesStatus'), 'Error al crear centro', true); }
+    });
+
+    // Evento Crear Maquinaria
+    document.getElementById('crearMaquinariaForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+            tipo: document.getElementById('maqTipo').value,
+            id_instalacion: document.getElementById('maqInstalacion').value,
+            estado: document.getElementById('maqEstado').value
+        };
+        try {
+            await fetchJson(MAQUINARIA_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            e.target.reset();
+            cargarDatos();
+        } catch (error) { showStatus(document.getElementById('maquinariaStatus'), 'Error al registrar maquinaria', true); }
+    });
+
+    if (viewSelector) viewSelector.addEventListener('change', cargarDatos);
+
+    // Adjuntar la función de eliminación global a la ventana para el uso inline de los botones
+    window.genericDelete = genericDelete;
+
+    cargarDatos();
 });
