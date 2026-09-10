@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervisión de incidencias - Cerbero</title>
+    <link rel="stylesheet" href="styles.css?v=6">
+</head>
+<body>
+    <div class="contenedor">
+        <aside class="sidebar">
+            <div>
+                <div class="sidebar-brand">
+                    <h1>Cerbero</h1>
+                    <img src="img/Logo SiGeRu Cerbero.png" alt="Logo de Cerbero" class="sidebar-brand-logo" width="36" height="36">
+                </div>
+                <p>Sistema de Gestión de Residuos Urbanos</p>
+                <nav id="sidebarNav" data-current-page="incidencias-admin" aria-label="Menú principal">
+                    <a href="index.html">Principal</a><a href="usuarios.html">Gestión</a>
+                </nav>
+            </div>
+            <div class="empresa"><p>Empresa</p><h2>Cerbero S.A.S.</h2></div>
+        </aside>
+
+        <main class="contenido">
+            <div class="incidencias-shell">
+                <header class="gestion-header">
+                    <div class="gestion-heading">
+                        <span class="pill pill-gestion">Administración</span>
+                        <h1>Supervisión de incidencias</h1>
+                        <p>Consultá los reportes enviados por los vecinos y actualizá su estado.</p>
+                    </div>
+                    <div id="adminIncidenciasUserPanel" class="user-panel"></div>
+                </header>
+                <section id="adminIncidenciasAcceso" class="incidencias-panel" aria-live="polite">
+                    <h2>Verificando acceso...</h2><p>Estamos comprobando los permisos de administración.</p>
+                </section>
+                <section id="adminIncidenciasModulo" class="incidencias-panel" hidden>
+                    <div class="incidencias-list-heading">
+                        <div><h2>Incidencias registradas</h2><p>Los cambios de estado se reflejan también en el perfil del vecino.</p></div>
+                        <button id="actualizarAdminIncidenciasBtn" class="incidencia-secondary-btn" type="button">Actualizar</button>
+                    </div>
+                    <div id="adminIncidenciasStatus" class="gestion-status" aria-live="polite"></div>
+                    <div class="incidencias-table-wrap">
+                        <table class="incidencias-table incidencias-admin-table">
+                            <thead><tr><th>Código</th><th>Vecino</th><th>Descripción</th><th>Ubicación</th><th>Foto</th><th>Estado</th></tr></thead>
+                            <tbody id="adminIncidenciasTablaBody"><tr><td colspan="6" class="tabla-vacia">Cargando incidencias...</td></tr></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    <script src="navigation.js?v=14"></script>
+    <script src="incidencias-admin.js?v=14"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de rutas - Cerbero</title>
+    <link rel="stylesheet" href="styles.css?v=12">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <div class="contenedor">
+        <aside class="sidebar">
+            <div>
+                <div class="sidebar-brand">
+                    <h1>Cerbero</h1>
+                    <img src="img/Logo SiGeRu Cerbero.png" alt="Logo de Cerbero" class="sidebar-brand-logo" width="36" height="36">
+                </div>
+                <p>Sistema de Gestión de Residuos Urbanos</p>
+                <nav id="sidebarNav" data-current-page="rutas" aria-label="Menú principal">
+                    <a href="index.html">Principal</a>
+                    <a href="usuarios.html">Gestión</a>
+                </nav>
+            </div>
+            <div class="empresa">
+                <p>Empresa</p>
+                <h2>Cerbero S.A.S.</h2>
+            </div>
+        </aside>
+
+        <main class="contenido">
+            <div class="rutas-shell">
+                <header class="gestion-header">
+                    <div class="gestion-heading">
+                        <span class="pill pill-gestion">Planificación</span>
+                        <h1>Gestión de rutas</h1>
+                        <p>Cinco recorridos viales por Montevideo, siguiendo calles reales y con diez puntos exclusivos en cada ruta.</p>
+                    </div>
+                    <div class="gestion-actions">
+                        <div id="rutasUserPanel" class="user-panel"></div>
+                        <a class="auth-btn secondary" href="index.html">Volver al inicio</a>
+                    </div>
+                </header>
+
+                <section id="rutasAcceso" class="incidencias-panel" aria-live="polite">
+                    <h2>Verificando acceso...</h2>
+                    <p>Estamos comprobando los permisos de administración.</p>
+                </section>
+
+                <div id="rutasModulo" hidden>
+                    <section class="rutas-intro">
+                        <div>
+                            <h2>Rutas de recolección</h2>
+                            <p><span class="punto-recoleccion-muestra"></span>Cada punto blanco representa un contenedor y se identifica como “Punto de recolección”. Ningún contenedor se repite.</p>
+                        </div>
+                        <button id="actualizarRutasBtn" class="incidencia-secondary-btn" type="button">Actualizar mapas</button>
+                    </section>
+                    <div id="rutasStatus" class="gestion-status" aria-live="polite"></div>
+                    <section id="rutasGrid" class="rutas-grid" aria-label="Mapas de rutas de recolección"></section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="navigation.js?v=14"></script>
+    <script src="rutas.js?v=12"></script>
+</body>
+</html>

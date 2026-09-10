@@ -1,0 +1,4 @@
+.git
+.gitignore
+backend/uploads/incidencias/*
+backend/tests/.test-output

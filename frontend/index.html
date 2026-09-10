@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>indice</title>
+    <link rel="stylesheet" href="styles.css?v=8">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+        #mapaInteractivo {
+            width: 100%;
+            height: 350px;
+            border-radius: 10px;
+            margin-top: 15px;
+            z-index: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="contenedor">
+
+        <aside class="sidebar">
+
+            <div>
+
+                <h1>Cerbero</h1>
+                <p>Sistema de Gestión de Residuos Urbanos</p>
+
+              <nav id="sidebarNav" data-current-page="principal" aria-label="Menú principal">
+                  <a href="index.html" class="active">Principal</a>
+                  <a href="incidencias.html">Incidencias</a>
+              </nav>
+
+            </div>
+
+            <div class="empresa">
+
+                <p>Empresa</p>
+                <h2>Cerbero S.A.S.</h2>
+
+            </div>
+
+        </aside>
+
+        <main class="contenido">
+
+            <header class="cabecera-principal">
+
+                <div class="titulo-principal">
+
+                    <h1>Panel Principal</h1>
+                    <p>Gestión ecológica y monitoreo inteligente de residuos urbanos.</p>
+
+                </div>
+
+                <div class="header-actions">
+
+                    <div id="userPanel" class="user-panel"></div>
+
+                </div>
+
+            </header>
+
+            <section id="roleBanner" class="role-banner"></section>
+
+            <section id="roleQuickActions" class="quick-actions"></section>
+
+            <section class="estadisticas">
+
+                <div class="card">
+                    <h3>Incidencias Abiertas</h3>
+                    <span id="metric-incidencias">--</span>
+                </div>
+
+                <div class="card">
+                    <h3>Contenedores Activos</h3>
+                    <span id="metric-contenedores">--</span>
+                </div>
+
+                <div class="card">
+                    <h3>Camiones Operativos</h3>
+                    <span id="metric-camiones">--</span>
+                </div>
+
+                <div class="card">
+                    <h3>Toneladas Recolectadas</h3>
+                    <span id="metric-toneladas">--</span>
+                </div>
+
+            </section>
+
+            <section class="principal">
+
+                        <div class="mapa">
+                        <h2>Mapa Interactivo</h2>
+                        <div id="mapaInteractivo"></div>
+                        </div>
+
+                <div class="actividad">
+
+                    <h2>Actividad Reciente</h2>
+
+                    <ul id="activityList">
+                        <li>Cargando actividad reciente...</li>
+                    </ul>
+
+                </div>
+
+            </section>
+
+            <section class="tablas">
+
+                <div class="tabla">
+
+                    <div class="titulo">
+
+                        <h2>Contenedores</h2>
+                        <button>Ver Todos</button>
+
+                    </div>
+
+                    <table>
+
+                        <tr>
+
+                            <th>ID</th>
+                            <th>Zona</th>
+                            <th>Estado</th>
+
+                        </tr>
+
+                        <tbody id="contenedoresTableBody">
+                            <tr><td colspan="3" class="tabla-vacia">Cargando contenedores...</td></tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="tabla">
+
+                    <div class="titulo">
+
+                        <h2>Flota</h2>
+                        <button>Gestionar</button>
+
+                    </div>
+
+                    <table>
+
+                        <tr>
+
+                            <th>Camión</th>
+                            <th>Estado</th>
+
+                        </tr>
+
+                        <tbody id="camionesTableBody">
+                            <tr><td colspan="2" class="tabla-vacia">Cargando camiones...</td></tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <script>
+    const roles = {
+            guest: {
+                name: 'Visitante',
+                rol: 'Sin registro',
+                initials: '?',
+                isLogged: false,
+                className: 'role-guest',
+                pill: 'Acceso público',
+                title: 'Tu barrio también puede participar',
+                subtitle: 'Registrate para reportar problemas, ver alertas y recibir novedades de tu zona.',
+                highlights: ['Reporta residuos o fallas', 'Recibe recomendaciones de limpieza', 'Mantén tu barrio informado'],
+                actions: [
+                    { title: 'Iniciar sesión', desc: 'Ingresa a tu cuenta', href: 'login.html?mode=login', type: 'primary' },
+                    { title: 'Registrarme', desc: 'Crea tu acceso', href: 'login.html?mode=register', type: 'secondary' },
+                    { title: 'Ver servicios', desc: 'Conocé cómo funciona', href: '#', type: 'outline' }
+                ]
+            },
+            vecino: {
+                name: 'Rafaela Benavides',
+                rol: 'Vecino',
+                initials: 'LP',
+                isLogged: true,
+                className: 'role-vecino',
+                pill: 'Comunidad',
+                title: 'Tu vecino ayuda a mantener el barrio limpio',
+                subtitle: 'Podés reportar incidencias, ver estados de contenedores y seguir novedades del área.',
+                highlights: ['Reporta situaciones urgentes', 'Consulta el estado de tu zona', 'Recibí alertas locales'],
+                actions: [
+                    { title: 'Reportar problema', desc: 'Enviar nueva incidencia', href: 'incidencias.html', type: 'primary' },
+                    { title: 'Ver mi zona', desc: 'Consultar contenedores', href: '#', type: 'secondary' },
+                    { title: 'Ver historial', desc: 'Revisá tus reportes', href: '#', type: 'outline' }
+                ]
+            },
+            cuadrilla: {
+                name: 'Martín Ruiz',
+                rol: 'Cuadrilla',
+                initials: 'MR',
+                isLogged: true,
+                className: 'role-cuadrilla',
+                pill: 'Operación',
+                title: 'Coordinación de recorridos diaria',
+                subtitle: 'El equipo puede ver tareas asignadas, actualizar estados y priorizar rutas.',
+                highlights: ['Gestioná recorridos del día', 'Actualizá estado de limpieza', 'Priorizá zonas con más incidencias'],
+                actions: [
+                    { title: 'Ver recorrido', desc: 'Abrir ruta asignada', href: '#', type: 'primary' },
+                    { title: 'Actualizar estado', desc: 'Marcar tarea completada', href: '#', type: 'secondary' },
+                    { title: 'Alertas', desc: 'Ver incidencias críticas', href: '#', type: 'outline' }
+                ]
+            },
+            operario: {
+                name: 'Andrés López',
+                rol: 'Operario de instalación',
+                initials: 'AL',
+                isLogged: true,
+                className: 'role-operario',
+                pill: 'Instalaciones',
+                title: 'Monitoreo de instalaciones y equipos',
+                subtitle: 'Podés revisar el estado de las instalaciones, coordinar mantenimiento y responder alertas.',
+                highlights: ['Controlá equipos activos', 'Recibí notificaciones de fallas', 'Mantené la red operativa'],
+                actions: [
+                    { title: 'Monitorear', desc: 'Ver estado de instalaciones', href: '#', type: 'primary' },
+                    { title: 'Mantenimiento', desc: 'Gestionar tareas', href: '#', type: 'secondary' },
+                    { title: 'Historial', desc: 'Consultar registros', href: '#', type: 'outline' }
+                ]
+            },
+            admin: {
+                name: 'Marina Costa',
+                rol: 'Administrador municipal',
+                initials: 'MC',
+                isLogged: true,
+                className: 'role-admin',
+                pill: 'Gestión municipal',
+                title: 'Supervisión integral del sistema',
+                subtitle: 'Desde acá podés ver el estado general, priorizar recursos y analizar reportes.',
+                highlights: ['Seguimiento de la operación completa', 'Asignación de recursos', 'Reportes y estadísticas'],
+                actions: [
+                    { title: 'Supervisar', desc: 'Ver incidencias', href: 'incidencias-admin.html', type: 'primary' },
+                    { title: 'Gestionar rutas', desc: 'Ver recorridos de recolección', href: 'rutas.html', type: 'secondary' },
+                    { title: 'Reportes', desc: 'Analizar desempeño', href: '#', type: 'outline' }
+                ]
+            },
+        };
+        async function logout() {
+            try {
+                await fetch(new URL('../backend/api/auth.php?action=logout', window.location.href).toString(), {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'X-CSRF-Token': localStorage.getItem('cerberoCsrfToken') || '' }
+                });
+            } catch (error) {
+                console.error('No se pudo cerrar la sesión en el servidor', error);
+            }
+            localStorage.removeItem('cerberoUser');
+            localStorage.removeItem('cerberoCsrfToken');
+            window.location.href = 'index.html';
+        }
+
+        function normalizeRoleKey(roleValue) {
+            const value = String(roleValue || '').trim().toLowerCase();
+            const aliases = {
+                'admin': 'admin',
+                'administrador': 'admin',
+                'administrador municipal': 'admin',
+                'cuadrilla': 'cuadrilla',
+                'cuadrilla de recoleccion': 'cuadrilla',
+                'cuadrilla de recolección': 'cuadrilla',
+                'operario': 'operario',
+                'operario de centro': 'operario',
+                'centro de acopio': 'operario',
+                'miembro de centro de acopio': 'operario',
+                'vecino': 'vecino',
+                'visitante': 'guest',
+                'guest': 'guest'
+            };
+
+            return aliases[value] || value || 'guest';
+        }
+
+        function getDisplayRole(userData, config) {
+            if (!userData) {
+                return config.rol;
+            }
+
+            const roleMap = {
+                guest: 'Sin registro',
+                vecino: 'Vecino',
+                cuadrilla: 'Cuadrilla de recolección',
+                operario: 'Operario de centro',
+                admin: 'Administrador municipal'
+            };
+
+            return roleMap[normalizeRoleKey(userData.role)] || config.rol;
+        }
+
+        function renderRole(role, userData = null) {
+            const resolvedRole = userData ? normalizeRoleKey(userData.role || role) : normalizeRoleKey(role);
+            const config = roles[resolvedRole] || roles.guest;
+            const userPanel = document.getElementById('userPanel');
+            const roleBanner = document.getElementById('roleBanner');
+            const roleQuickActions = document.getElementById('roleQuickActions');
+
+            const displayName = userData ? `${userData.nombre} ${userData.apellido}` : config.name;
+            const displayInitials = userData ? `${(userData.nombre || '').charAt(0)}${(userData.apellido || '').charAt(0)}` : config.initials;
+            const displayRole = getDisplayRole(userData, config);
+
+            userPanel.innerHTML = `
+                <div class="avatar">${displayInitials.toUpperCase()}</div>
+                <div class="user-details">
+                    <strong>${displayName}</strong>
+                    <p>${displayRole}</p>
+                </div>
+                ${config.isLogged ? `<div class="auth-actions">${resolvedRole === 'vecino' ? '<a class="ghost-btn" href="incidencias.html">Nueva incidencia</a>' : ''}<button class="ghost-btn logout-btn" type="button" onclick="logout()">Cerrar sesión</button></div>` : '<div class="auth-actions"><a class="auth-btn" href="login.html?mode=login">Iniciar sesión</a><a class="auth-btn secondary" href="login.html?mode=register">Registrarse</a></div>'}
+            `;
+
+            roleBanner.className = `role-banner ${config.className}`;
+            roleBanner.innerHTML = `
+                <div>
+                    <span class="pill">${config.pill}</span>
+                    <h2>${config.title}</h2>
+                    <p>${config.subtitle}</p>
+                </div>
+                <ul>
+                    ${config.highlights.map(item => `<li>${item}</li>`).join('')}
+                </ul>
+            `;
+
+            roleQuickActions.innerHTML = config.actions.map(action => `
+                <a class="quick-card ${action.type}" href="${action.href}">
+                    <strong>${action.title}</strong>
+                    <span>${action.desc}</span>
+                </a>
+            `).join('');
+        }
+
+        function escapeHtml(value) {
+            const element = document.createElement('div');
+            element.textContent = String(value ?? '');
+            return element.innerHTML;
+        }
+
+        function formatearEstadoContenedor(estado) {
+            const value = String(estado || '').trim();
+            return value ? value.charAt(0).toUpperCase() + value.slice(1) : 'En buen estado';
+        }
+
+        function renderizarContenedoresMapa(contenedores, centros = []) {
+            const lista = Array.isArray(contenedores) ? contenedores : [];
+            const listaCentros = Array.isArray(centros) ? centros : [];
+            window.cerberoContenedoresPendientes = lista;
+            window.cerberoCentrosPendientes = listaCentros;
+            if (!window.cerberoMap || !window.cerberoMapMarkers || typeof L === 'undefined') return;
+
+            window.cerberoMapMarkers.clearLayers();
+            const icono = L.divIcon({
+                className: 'contenedor-emoji-marker',
+                html: '<span role="img" aria-label="Contenedor">🗑️</span>',
+                iconSize: [34, 34],
+                iconAnchor: [17, 28]
+            });
+            const coordenadas = [];
+
+            lista.filter((item) => item.latitud != null && item.longitud != null).slice(0, 50).forEach((item) => {
+                const punto = [Number(item.latitud), Number(item.longitud)];
+                coordenadas.push(punto);
+                const estado = formatearEstadoContenedor(item.estado);
+                const llenado = Math.max(0, Math.min(100, Number(item.nivel_llenado || 0)));
+                const capacidad = Number(item.capacidad || 0);
+                const detalle = `
+                    <strong>Contenedor #${Number(item.id)}</strong><br>
+                    ${escapeHtml(item.zona || 'Montevideo')}<br>
+                    Estado: <strong>${escapeHtml(estado)}</strong><br>
+                    Llenado: <strong>${llenado.toFixed(0)} %</strong><br>
+                    Capacidad: <strong>${capacidad.toFixed(0)} L</strong>
+                `;
+                const marker = L.marker(punto, {
+                    icon: icono,
+                    title: `Contenedor #${Number(item.id)}`
+                }).addTo(window.cerberoMapMarkers);
+                marker.bindTooltip(detalle, { direction: 'top', offset: [0, -22], opacity: 0.98 });
+                marker.bindPopup(detalle);
+            });
+
+            listaCentros.filter((centro) => centro.latitud != null && centro.longitud != null).forEach((centro) => {
+                const punto = [Number(centro.latitud), Number(centro.longitud)];
+                coordenadas.push(punto);
+                const nombre = escapeHtml(centro.nombre || 'Centro de acopio');
+                const iconoCentro = L.divIcon({
+                    className: 'centro-reciclaje-marker',
+                    html: `<span aria-label="Centro de reciclaje">♻</span><small>${nombre}</small>`,
+                    iconSize: [170, 48],
+                    iconAnchor: [20, 24]
+                });
+                const detalle = `<strong>Nombre: "${nombre}"</strong><br><span class="centro-tooltip-secondary">Derivado a CERBERO</span>`;
+                const marker = L.marker(punto, { icon: iconoCentro, title: centro.nombre || 'Centro de acopio' })
+                    .addTo(window.cerberoMapMarkers);
+                marker.bindTooltip(detalle, { direction: 'top', offset: [0, -20], opacity: 0.98 });
+                marker.bindPopup(detalle);
+            });
+
+            if (coordenadas.length) {
+                window.cerberoMap.fitBounds(coordenadas, { padding: [28, 28], maxZoom: 12 });
+            }
+        }
+
+        async function cargarMetricas() {
+            try {
+                const response = await fetch('../backend/api/dashboard.php');
+                const payload = await response.json();
+
+                if (!payload.success) {
+                    throw new Error(payload.message || 'No se pudieron cargar las métricas.');
+                }
+
+                const data = payload.data || {};
+                document.getElementById('metric-incidencias').textContent = data.incidencias_abiertas ?? 0;
+                document.getElementById('metric-contenedores').textContent = data.contenedores_activos ?? 0;
+                document.getElementById('metric-camiones').textContent = data.camiones_operativos ?? 0;
+                document.getElementById('metric-toneladas').textContent = `${Number(data.toneladas_recolectadas ?? 0).toFixed(2)}T`;
+
+                const activityList = document.getElementById('activityList');
+                const activities = Array.isArray(data.recent_activity) ? data.recent_activity : [];
+                activityList.innerHTML = activities.length
+                    ? activities.map((item) => `<li>${escapeHtml(item.text)}</li>`).join('')
+                    : '<li>No hay actividad reciente registrada.</li>';
+
+                const contenedoresBody = document.getElementById('contenedoresTableBody');
+                const contenedores = Array.isArray(data.contenedores) ? data.contenedores : [];
+                contenedoresBody.innerHTML = contenedores.length
+                    ? contenedores.slice(0, 3).map((contenedor) => `
+                        <tr>
+                            <td>#${contenedor.id}</td>
+                            <td>${escapeHtml(contenedor.zona || 'Sin zona')}</td>
+                            <td>${escapeHtml(formatearEstadoContenedor(contenedor.estado))}</td>
+                        </tr>
+                    `).join('')
+                    : '<tr><td colspan="3" class="tabla-vacia">No hay contenedores registrados.</td></tr>';
+
+                const camionesBody = document.getElementById('camionesTableBody');
+                const camiones = Array.isArray(data.camiones) ? data.camiones : [];
+                camionesBody.innerHTML = camiones.length
+                    ? camiones.map((camion) => `
+                        <tr>
+                            <td>${escapeHtml(camion.matricula || 'Sin matrícula')}</td>
+                            <td>${escapeHtml(camion.estado || '-')}</td>
+                        </tr>
+                    `).join('')
+                    : '<tr><td colspan="2" class="tabla-vacia">No hay camiones registrados.</td></tr>';
+
+                renderizarContenedoresMapa(contenedores, data.centros_acopio || []);
+            } catch (error) {
+                document.getElementById('metric-incidencias').textContent = '0';
+                document.getElementById('metric-contenedores').textContent = '0';
+                document.getElementById('metric-camiones').textContent = '0';
+                document.getElementById('metric-toneladas').textContent = '0.00T';
+                document.getElementById('activityList').innerHTML = '<li>No hay actividad reciente registrada.</li>';
+                document.getElementById('contenedoresTableBody').innerHTML = '<tr><td colspan="3" class="tabla-vacia">No hay contenedores registrados.</td></tr>';
+                document.getElementById('camionesTableBody').innerHTML = '<tr><td colspan="2" class="tabla-vacia">No hay camiones registrados.</td></tr>';
+            }
+        }
+
+        // La sesión real vive en el servidor (PHP $_SESSION). Al cargar la página,
+        // se sincroniza con el backend en vez de confiar ciegamente en localStorage.
+        async function sincronizarSesion() {
+            try {
+                const response = await fetch(new URL('../backend/api/auth.php?action=me', window.location.href).toString(), {
+                    credentials: 'include'
+                });
+                const payload = await response.json();
+                const user = payload?.data?.user || null;
+
+                if (user) {
+                    localStorage.setItem('cerberoUser', JSON.stringify(user));
+                    renderRole(normalizeRoleKey(user.role), user);
+                } else {
+                    localStorage.removeItem('cerberoUser');
+                    renderRole('guest');
+                }
+            } catch (error) {
+                console.error('No se pudo verificar la sesión', error);
+                renderRole('guest');
+            }
+        }
+
+        sincronizarSesion();
+        cargarMetricas();
+    </script>
+    <script src="navigation.js?v=14"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Verificar que exista el contenedor del mapa
+            const mapElement = document.getElementById('mapaInteractivo');
+            if (!mapElement) return;
+
+            const map = L.map('mapaInteractivo').setView([-34.9011, -56.1645], 13);
+            window.cerberoMap = map;
+            window.cerberoMapMarkers = L.layerGroup().addTo(map);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+
+            renderizarContenedoresMapa(
+                window.cerberoContenedoresPendientes || [],
+                window.cerberoCentrosPendientes || []
+            );
+        });
+    </script>
+</body>
+
+</html>

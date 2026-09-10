@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incidencias - Cerbero</title>
+    <link rel="stylesheet" href="styles.css?v=6">
+</head>
+<body>
+    <div class="contenedor">
+        <aside class="sidebar">
+            <div>
+                <h1>Cerbero</h1>
+                <p>Sistema de Gestión de Residuos Urbanos</p>
+                <nav id="sidebarNav" data-current-page="incidencias" aria-label="Menú principal">
+                    <a href="index.html">Principal</a>
+                    <a href="incidencias.html" class="active">Incidencias</a>
+                </nav>
+            </div>
+            <div class="empresa">
+                <p>Empresa</p>
+                <h2>Cerbero S.A.S.</h2>
+            </div>
+        </aside>
+
+        <main class="contenido">
+            <div class="incidencias-shell">
+                <header class="gestion-header">
+                    <div class="gestion-heading">
+                        <span class="pill pill-gestion">Comunidad</span>
+                        <h1>Mis incidencias</h1>
+                        <p>Reportá situaciones relacionadas con la gestión de residuos y consultá su estado.</p>
+                    </div>
+                    <div id="incidenciasUserPanel" class="user-panel"></div>
+                </header>
+
+                <section id="incidenciasAcceso" class="incidencias-panel" aria-live="polite">
+                    <h2>Verificando acceso...</h2>
+                    <p>Estamos comprobando si tenés una sesión iniciada.</p>
+                </section>
+
+                <div id="incidenciasModulo" class="incidencias-modulo" hidden>
+                    <section class="incidencias-panel incidencias-registro">
+                        <button id="abrirIncidenciaBtn" class="incidencia-primary-btn" type="button" aria-expanded="false" aria-controls="incidenciaForm">
+                            Registrar incidencia
+                        </button>
+
+                        <form id="incidenciaForm" class="incidencia-form" enctype="multipart/form-data" hidden>
+                            <div class="incidencia-field incidencia-field-full">
+                                <label for="incidenciaFoto">Foto</label>
+                                <input id="incidenciaFoto" name="foto" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" required>
+                                <small>Formatos JPG, PNG o WEBP. Máximo 5 MB.</small>
+                                <img id="incidenciaFotoPreview" class="incidencia-preview" alt="Vista previa de la foto" hidden>
+                            </div>
+
+                            <div class="incidencia-field incidencia-field-full">
+                                <label for="incidenciaDescripcion">Breve descripción</label>
+                                <textarea id="incidenciaDescripcion" name="descripcion" maxlength="500" rows="4" placeholder="Contanos brevemente qué ocurrió" required></textarea>
+                            </div>
+
+                            <div class="incidencia-field incidencia-field-full">
+                                <label for="incidenciaUbicacion">Ubicación</label>
+                                <div class="incidencia-location-row">
+                                    <input id="incidenciaUbicacion" name="ubicacion" type="text" maxlength="255" placeholder="Barrio, calle y número o coordenadas" required>
+                                    <button id="usarUbicacionBtn" class="incidencia-secondary-btn" type="button">Usar mi ubicación</button>
+                                </div>
+                            </div>
+
+                            <div id="incidenciaFormStatus" class="gestion-status incidencia-field-full" aria-live="polite"></div>
+
+                            <div class="incidencia-form-actions incidencia-field-full">
+                                <button class="incidencia-primary-btn" type="submit">Guardar incidencia</button>
+                                <button id="cancelarIncidenciaBtn" class="incidencia-secondary-btn" type="button">Cancelar</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section class="incidencias-panel">
+                        <div class="incidencias-list-heading">
+                            <div>
+                                <h2>Incidencias registradas</h2>
+                                <p>Este listado muestra únicamente las incidencias asociadas a tu perfil.</p>
+                            </div>
+                            <button id="actualizarIncidenciasBtn" class="incidencia-secondary-btn" type="button">Actualizar</button>
+                        </div>
+
+                        <div class="incidencias-table-wrap">
+                            <table class="incidencias-table">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Descripción</th>
+                                        <th>Ubicación</th>
+                                        <th>Foto</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="incidenciasTablaBody">
+                                    <tr><td colspan="5" class="tabla-vacia">Cargando incidencias...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="navigation.js?v=14"></script>
+    <script src="incidencias.js?v=14"></script>
+</body>
+</html>
