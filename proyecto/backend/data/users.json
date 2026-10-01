@@ -1,0 +1,11 @@
+[
+    {
+        "id": "usr_6a5e6ea91b11c9.58498975",
+        "nombre": "Ana",
+        "apellido": "P\u00e9rez",
+        "cedula": "12345678",
+        "email": "ana@example.com",
+        "password": "$2y$10$..DLxZLxLeIl7eZRhokHZ.EDD4SHnxRK0i00BKzSYu5KrC6bQ6TGi",
+        "created_at": "2026-07-20 20:53:29"
+    }
+]
