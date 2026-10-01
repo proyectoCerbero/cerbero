@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>login</title>
+
+    <link rel="stylesheet" href="styles.css?v=32">
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <div class="login-corner-brand" aria-label="Cerbero">
+            <span>Cerbero</span>
+            <img src="img/Logo SiGeRu Cerbero.png" alt="Logo de Cerbero" width="50" height="50">
+        </div>
+
+        <div class="login-box">
+
+            <h1>Cerbero</h1>
+            <p>Sistema de Gestión de Residuos Urbanos</p>
+
+            <!-- Este es el menú, donde podes elegir entre registro y login -->
+            <div id="menu">
+
+                <button onclick="mostrarLogin()">
+                    Iniciar sesión
+                </button>
+
+                <button onclick="mostrarRegistro()">
+                    Registrarse
+                </button>
+
+            </div>
+
+            <!-- Acá empieza el login y el registro -->
+
+            <div id="login" class="formulario">
+
+                <h2>Iniciar sesión</h2>
+
+                <form id="loginForm">
+
+                    <label for="loginEmail">Correo electrónico</label>
+                    <input id="loginEmail" name="email" type="email" maxlength="100" autocomplete="email" autocapitalize="none" spellcheck="false" required>
+
+                    <label for="loginPassword">Contraseña</label>
+                    <input id="loginPassword" name="password" type="password" maxlength="72" autocomplete="current-password" required>
+
+                    <button type="submit" id="loginSubmitBtn">
+                        Ingresar
+                    </button>
+
+                    <button type="button" class="volver" onclick="volver()">
+                        Volver
+                    </button>
+
+                    <p id="loginStatus" style="margin-top: 10px; min-height: 20px;"></p>
+
+                </form>
+
+            </div>
+
+            <div id="registro" class="formulario">
+
+                <h2>Registrarse</h2>
+
+                <form id="registerForm">
+
+                    <label for="registerNombre">Nombre</label>
+                    <input id="registerNombre" name="nombre" type="text" minlength="2" maxlength="50" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü' -]{2,50}" title="Usá únicamente letras, espacios, apóstrofes o guiones" autocomplete="given-name" required>
+
+                    <label for="registerApellido">Apellido</label>
+                    <input id="registerApellido" name="apellido" type="text" minlength="2" maxlength="50" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü' -]{2,50}" title="Usá únicamente letras, espacios, apóstrofes o guiones" autocomplete="family-name" required>
+
+                    <label for="registerCedula">Cédula</label>
+                    <input id="registerCedula" name="cedula" type="text" inputmode="numeric" pattern="[0-9]{7,8}" minlength="7" maxlength="8" title="Ingresá únicamente 7 u 8 números" autocomplete="off" required>
+
+                    <label for="registerEmail">Correo electrónico</label>
+                    <input id="registerEmail" name="email" type="email" maxlength="100" autocomplete="email" autocapitalize="none" spellcheck="false" required>
+
+                    <label for="registerPassword">Contraseña</label>
+                    <input id="registerPassword" name="password" type="password" minlength="8" maxlength="72" autocomplete="new-password" required>
+                    <small>Debe tener al menos 8 caracteres.</small>
+
+                    <button type="submit" id="registerSubmitBtn">
+                        Registrarse
+                    </button>
+
+                    <button type="button" class="volver" onclick="volver()">
+                        Volver
+                    </button>
+
+                    <p id="registerStatus" style="margin-top: 10px; min-height: 20px;"></p>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="auth.js?v=15"></script>
+    <script>
+
+        function mostrarLogin() {
+
+            document.getElementById("menu").style.display = "none";
+            document.getElementById("login").style.display = "block";
+            document.getElementById("registro").style.display = "none";
+
+        }
+
+        function mostrarRegistro() {
+
+            document.getElementById("menu").style.display = "none";
+            document.getElementById("registro").style.display = "block";
+            document.getElementById("login").style.display = "none";
+
+        }
+
+        function volver() {
+
+            document.getElementById("menu").style.display = "flex";
+            document.getElementById("login").style.display = "none";
+            document.getElementById("registro").style.display = "none";
+
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const mode = params.get('mode');
+
+        if (mode === 'register') {
+            mostrarRegistro();
+        } else {
+            mostrarLogin();
+        }
+
+    </script>
+
+</body>
+
+</html>

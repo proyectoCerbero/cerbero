@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervisión de incidencias - Cerbero</title>
+    <link rel="stylesheet" href="styles.css?v=32">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+    <div class="contenedor">
+        <aside class="sidebar">
+            <div>
+                <div class="sidebar-brand">
+                    <h1>Cerbero</h1>
+                    <img src="img/Logo SiGeRu Cerbero.png" alt="Logo de Cerbero" class="sidebar-brand-logo" width="48" height="48">
+                </div>
+                <p>Sistema de Gestión de Residuos Urbanos</p>
+                <nav id="sidebarNav" data-current-page="incidencias-admin" aria-label="Menú principal">
+                    <a href="index.html">Principal</a><a href="usuarios.html">Usuarios</a>
+                </nav>
+            </div>
+            <div class="empresa"><p>Empresa</p><h2>Cerbero S.A.S.</h2></div>
+        </aside>
+
+        <main class="contenido">
+            <div class="incidencias-shell">
+                <header class="gestion-header">
+                    <div class="gestion-heading">
+                        <span class="pill pill-gestion">Administración</span>
+                        <h1>Supervisión de incidencias</h1>
+                        <p>Consultá los reportes enviados por los vecinos y actualizá su estado.</p>
+                    </div>
+                    <div id="adminIncidenciasUserPanel" class="user-panel"></div>
+                </header>
+                <section id="adminIncidenciasAcceso" class="incidencias-panel" aria-live="polite">
+                    <h2>Verificando acceso...</h2><p>Estamos comprobando los permisos de administración.</p>
+                </section>
+                <section id="adminIncidenciasModulo" class="incidencias-panel" hidden>
+                    <div class="incidencias-mapa-panel">
+                        <div class="incidencias-list-heading"><div><h2>Mapa de incidencias</h2><p>Se muestran las incidencias con coordenadas registradas, sin contenedores.</p></div></div>
+                        <div id="mapaIncidenciasAdmin" class="mapa-incidencias" aria-label="Mapa de incidencias globales"></div>
+                        <p id="mapaIncidenciasAviso" class="mapa-incidencias-aviso" role="status" aria-live="polite"></p>
+                        <button id="cancelarUbicacionIncidencia" class="incidencia-secondary-btn" type="button" hidden>Cancelar ubicación</button>
+                    </div>
+                    <div class="incidencias-list-heading">
+                        <div><h2>Incidencias registradas</h2><p>El personal puede actualizar el estado; solo el administrador puede eliminar.</p></div>
+                        <button id="actualizarAdminIncidenciasBtn" class="incidencia-secondary-btn" type="button">Actualizar</button>
+                    </div>
+                    <div id="adminIncidenciasStatus" class="gestion-status" aria-live="polite"></div>
+                    <div class="incidencias-table-wrap">
+                        <table class="incidencias-table incidencias-admin-table">
+                            <thead><tr><th>Código</th><th>Acciones</th><th>Vecino</th><th>Descripción</th><th>Ubicación</th><th>Foto</th><th>Estado</th></tr></thead>
+                            <tbody id="adminIncidenciasTablaBody"><tr><td colspan="7" class="tabla-vacia">Cargando incidencias...</td></tr></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div id="incidenciaFotoModal" class="incidencia-photo-modal" hidden aria-hidden="true">
+        <div class="incidencia-photo-dialog" role="dialog" aria-modal="true" aria-labelledby="incidenciaFotoModalTitulo">
+            <div class="incidencia-photo-header">
+                <h2 id="incidenciaFotoModalTitulo">Foto de la incidencia</h2>
+                <button id="cerrarIncidenciaFotoBtn" class="incidencia-photo-close" type="button" aria-label="Cerrar foto">×</button>
+            </div>
+            <img id="incidenciaFotoAmpliada" class="incidencia-photo-expanded" alt="Foto ampliada de la incidencia">
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="navigation.js?v=24"></script>
+    <script src="incidencias-admin.js?v=19"></script>
+</body>
+</html>

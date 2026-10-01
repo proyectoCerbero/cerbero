@@ -1,0 +1,53 @@
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: cerbero
+      MYSQL_USER: cerbero
+      MYSQL_PASSWORD: cerbero_local
+      MYSQL_ROOT_PASSWORD: root_local
+    volumes:
+      - cerbero_db:/var/lib/mysql
+      - ./CERBEROBD.sql:/docker-entrypoint-initdb.d/01-cerbero.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: cerbero
+      DB_USERNAME: cerbero
+      DB_PASSWORD: cerbero_local
+      CERBERO_ALLOWED_ORIGINS: http://localhost:8080
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-5-mini}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      CERBERO_MAIL_FROM: ${CERBERO_MAIL_FROM:-no-reply@cerbero.local}
+    ports:
+      - "8080:80"
+    volumes:
+      - cerbero_uploads:/var/www/html/backend/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "$$r=@file_get_contents('http://localhost/backend/api/health.php'); exit($$r===false?1:0);"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  cerbero_db:
+  cerbero_uploads:

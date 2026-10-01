@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de rutas - Cerbero</title>
+    <link rel="stylesheet" href="styles.css?v=32">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <div class="contenedor">
+        <aside class="sidebar">
+            <div>
+                <div class="sidebar-brand">
+                    <h1>Cerbero</h1>
+                    <img src="img/Logo SiGeRu Cerbero.png" alt="Logo de Cerbero" class="sidebar-brand-logo" width="48" height="48">
+                </div>
+                <p>Sistema de Gestión de Residuos Urbanos</p>
+                <nav id="sidebarNav" data-current-page="generador-rutas" aria-label="Menú principal">
+                    <a href="index.html">Principal</a>
+                    <a href="usuarios.html">Usuarios</a>
+                </nav>
+            </div>
+            <div class="empresa"><p>Empresa</p><h2>Cerbero S.A.S.</h2></div>
+        </aside>
+
+        <main class="contenido">
+            <div class="generador-shell">
+                <header class="gestion-header">
+                    <div class="gestion-heading">
+                        <span class="pill pill-gestion">Planificación inteligente</span>
+                        <h1>Generador de rutas</h1>
+                        <p>Seleccioná todos los contenedores que necesites. CERBERO optimizará el orden y trazará el recorrido real por las calles.</p>
+                    </div>
+                    <div class="gestion-actions">
+                        <div id="generadorUserPanel" class="user-panel"></div>
+                        <a class="auth-btn secondary" href="rutas.html">Ver rutas</a>
+                    </div>
+                </header>
+
+                <section id="generadorAcceso" class="incidencias-panel" aria-live="polite">
+                    <h2>Verificando acceso...</h2>
+                    <p>Estamos comprobando los permisos de administración.</p>
+                </section>
+
+                <div id="generadorModulo" hidden>
+                    <section class="generador-panel">
+                        <div class="generador-toolbar">
+                            <div>
+                                <h2>Seleccionar contenedores</h2>
+                                <p>Hacé clic sobre cada punto del mapa para incluirlo o quitarlo.</p>
+                            </div>
+                            <div class="generador-contador"><strong id="seleccionCantidad">0</strong><span>seleccionados</span></div>
+                        </div>
+                        <div id="generadorMapa" class="generador-mapa" aria-label="Mapa para seleccionar contenedores"></div>
+                        <div class="generador-map-legend">
+                            <span><i class="leyenda-punto disponible"></i>Disponible</span>
+                            <span><i class="leyenda-punto seleccionado"></i>Seleccionado</span>
+                            <span><i class="leyenda-centro">♻</i>Centro de salida</span>
+                        </div>
+                        <p class="generador-service-note">El cálculo vial necesita conexión a Internet y utiliza la red de calles de OpenStreetMap.</p>
+                        <button id="generarRutaBtn" class="generador-primary-btn" type="button" disabled>Generar ruta</button>
+                        <div id="generadorStatus" class="gestion-status" aria-live="polite"></div>
+                    </section>
+
+                    <section id="rutaPreview" class="ruta-preview" hidden>
+                        <div>
+                            <span class="pill">Vista previa</span>
+                            <h2>Ruta vial calculada</h2>
+                            <p id="rutaPreviewResumen"></p>
+                        </div>
+                        <label class="ruta-nombre-label">Nombre de la ruta
+                            <input id="rutaNombre" type="text" minlength="2" maxlength="80" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü0-9 .,#'()_+/-]{2,80}" title="Ingresá un nombre de 2 a 80 caracteres válidos" required>
+                        </label>
+                        <div class="ruta-preview-actions">
+                            <button id="confirmarRutaBtn" class="generador-primary-btn" type="button">Confirmar y listar</button>
+                            <button id="cancelarRutaBtn" class="incidencia-secondary-btn" type="button">Cancelar</button>
+                        </div>
+                    </section>
+
+                    <section class="generador-listado">
+                        <div class="generador-listado-heading">
+                            <div><span class="pill pill-gestion">Guardadas</span><h2>Rutas generadas</h2></div>
+                            <span id="rutasGeneradasCantidad" class="ruta-cantidad">0 rutas</span>
+                        </div>
+                        <div class="incidencias-table-wrap">
+                            <table class="generador-table">
+                                <thead><tr><th>ID</th><th>Nombre</th><th>Centro</th><th>Contenedores</th><th>Distancia vial</th><th>Duración</th><th>Estado</th><th>Mapa</th></tr></thead>
+                                <tbody id="rutasGeneradasBody"><tr><td colspan="8" class="tabla-vacia">Cargando rutas...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="navigation.js?v=24"></script>
+    <script src="generador-rutas.js?v=15"></script>
+</body>
+</html>

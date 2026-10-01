@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incidencias - Cerbero</title>
+    <link rel="stylesheet" href="styles.css?v=32">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+    <div class="contenedor">
+        <aside class="sidebar">
+            <div>
+                <div class="sidebar-brand">
+                    <h1>Cerbero</h1>
+                    <img src="img/Logo SiGeRu Cerbero.png" alt="Logo de Cerbero" class="sidebar-brand-logo" width="48" height="48">
+                </div>
+                <p>Sistema de Gestión de Residuos Urbanos</p>
+                <nav id="sidebarNav" data-current-page="incidencias" aria-label="Menú principal">
+                    <a href="index.html">Principal</a>
+                    <a href="incidencias.html" class="active">Incidencias</a>
+                </nav>
+            </div>
+            <div class="empresa">
+                <p>Empresa</p>
+                <h2>Cerbero S.A.S.</h2>
+            </div>
+        </aside>
+
+        <main class="contenido">
+            <div class="incidencias-shell">
+                <header class="gestion-header">
+                    <div class="gestion-heading">
+                        <span class="pill pill-gestion">Comunidad</span>
+                        <h1>Registrar incidencia</h1>
+                        <p>Reportá situaciones relacionadas con la gestión de residuos.</p>
+                    </div>
+                    <div id="incidenciasUserPanel" class="user-panel"></div>
+                </header>
+
+                <section id="incidenciasAcceso" class="incidencias-panel" aria-live="polite">
+                    <h2>Verificando acceso...</h2>
+                    <p>Estamos comprobando si tenés una sesión iniciada.</p>
+                </section>
+
+                <div id="incidenciasModulo" class="incidencias-modulo" hidden>
+                    <section class="incidencias-panel incidencias-registro">
+                        <button id="abrirIncidenciaBtn" class="incidencia-primary-btn" type="button" aria-expanded="false" aria-controls="incidenciaForm">
+                            Registrar incidencia
+                        </button>
+
+                        <form id="incidenciaForm" class="incidencia-form" enctype="multipart/form-data" hidden>
+                            <div class="incidencia-field incidencia-field-full">
+                                <label for="incidenciaFoto">Foto</label>
+                                <input id="incidenciaFoto" name="foto" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" required>
+                                <small>Formatos JPG, PNG o WEBP. Máximo 5 MB.</small>
+                                <img id="incidenciaFotoPreview" class="incidencia-preview" alt="Vista previa de la foto" hidden>
+                            </div>
+
+                            <div class="incidencia-field incidencia-field-full">
+                                <label for="incidenciaDescripcion">Breve descripción</label>
+                                <textarea id="incidenciaDescripcion" name="descripcion" minlength="10" maxlength="500" rows="4" placeholder="Contanos brevemente qué ocurrió" required></textarea>
+                            </div>
+
+                            <div class="incidencia-field incidencia-field-full">
+                                <label for="incidenciaUbicacion">Ubicación</label>
+                                <div class="incidencia-location-row">
+                                    <input id="incidenciaUbicacion" name="ubicacion" type="text" minlength="3" maxlength="255" placeholder="Barrio, calle y número o coordenadas" required>
+                                    <button id="usarUbicacionBtn" class="incidencia-secondary-btn" type="button">Usar mi ubicación</button>
+                                    <button id="marcarUbicacionBtn" class="incidencia-secondary-btn" type="button" aria-expanded="false" aria-controls="incidenciaUbicacionMapa">Marcar en mapa</button>
+                                </div>
+                                <small>Para guardar el reporte, elegí el punto exacto con uno de los botones. Este mapa no muestra otras incidencias.</small>
+                                <div id="incidenciaUbicacionMapa" class="incidencia-location-picker" aria-label="Elegí el punto de tu incidencia" hidden></div>
+                                <small id="incidenciaPuntoElegido" aria-live="polite"></small>
+                                <input id="incidenciaLatitud" name="latitud" type="hidden">
+                                <input id="incidenciaLongitud" name="longitud" type="hidden">
+                            </div>
+
+                            <div id="incidenciaFormStatus" class="gestion-status incidencia-field-full" aria-live="polite"></div>
+
+                            <div class="incidencia-form-actions incidencia-field-full">
+                                <button class="incidencia-primary-btn" type="submit">Guardar incidencia</button>
+                                <button id="cancelarIncidenciaBtn" class="incidencia-secondary-btn" type="button">Cancelar</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section id="incidenciasListado" class="incidencias-panel" hidden>
+                        <div class="incidencias-list-heading">
+                            <div>
+                                <h2>Incidencias registradas</h2>
+                                <p>Este listado muestra únicamente las incidencias asociadas a tu perfil.</p>
+                            </div>
+                            <button id="actualizarIncidenciasBtn" class="incidencia-secondary-btn" type="button">Actualizar</button>
+                        </div>
+
+                        <div class="incidencias-table-wrap">
+                            <table class="incidencias-table">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Descripción</th>
+                                        <th>Ubicación</th>
+                                        <th>Foto</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="incidenciasTablaBody">
+                                    <tr><td colspan="5" class="tabla-vacia">Cargando incidencias...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section id="incidenciasMapaSeccion" class="incidencias-panel incidencias-mapa-panel" hidden>
+                        <div class="incidencias-list-heading"><div><h2>Mapa de incidencias</h2><p>Disponible exclusivamente para el personal autorizado.</p></div></div>
+                        <div id="mapaIncidencias" class="mapa-incidencias" aria-label="Mapa de incidencias"></div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="incidenciaFotoModal" class="incidencia-photo-modal" hidden aria-hidden="true">
+        <div class="incidencia-photo-dialog" role="dialog" aria-modal="true" aria-labelledby="incidenciaFotoModalTitulo">
+            <div class="incidencia-photo-header">
+                <h2 id="incidenciaFotoModalTitulo">Foto de la incidencia</h2>
+                <button id="cerrarIncidenciaFotoBtn" class="incidencia-photo-close" type="button" aria-label="Cerrar foto">×</button>
+            </div>
+            <img id="incidenciaFotoAmpliada" class="incidencia-photo-expanded" alt="Foto ampliada de la incidencia">
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="navigation.js?v=24"></script>
+    <script src="incidencias.js?v=18"></script>
+</body>
+</html>

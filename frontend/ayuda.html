@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayuda - Cerbero</title>
+    <link rel="stylesheet" href="styles.css?v=32">
+</head>
+<body>
+    <div class="contenedor">
+        <aside class="sidebar">
+            <div>
+                <div class="sidebar-brand">
+                    <h1>Cerbero</h1>
+                    <img src="img/Logo SiGeRu Cerbero.png" alt="Logo de Cerbero" class="sidebar-brand-logo" width="48" height="48">
+                </div>
+                <p>Sistema de Gestión de Residuos Urbanos</p>
+                <nav id="sidebarNav" data-current-page="ayuda" aria-label="Menú principal">
+                    <a href="index.html">Principal</a>
+                    <a href="incidencias.html">Incidencias</a>
+                    <a href="ayuda.html" class="active">Ayuda</a>
+                </nav>
+            </div>
+            <div class="empresa"><p>Empresa</p><h2>Cerbero S.A.S.</h2></div>
+        </aside>
+
+        <main class="contenido">
+            <div class="ayuda-shell">
+                <header class="gestion-header ayuda-intro">
+                    <div class="gestion-heading">
+                        <span class="pill pill-gestion">Atención</span>
+                        <h1>Ayuda</h1>
+                        <p>¿Tenés dudas? Elegí contacto para escribirnos o consultá información general sobre Cerbero.</p>
+                    </div>
+                    <div id="ayudaUserPanel" class="user-panel">
+                        <span class="pill">Visitante</span>
+                        <div class="auth-actions">
+                            <a class="auth-btn" href="login.html?mode=login">Iniciar sesión</a>
+                            <a class="auth-btn secondary" href="login.html?mode=register">Registrarse</a>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="ayuda-tabs" role="tablist" aria-label="Opciones de ayuda">
+                    <button id="contactoTab" class="ayuda-tab active" type="button" role="tab" aria-selected="true" aria-controls="contactoPanel">Contacto</button>
+                    <button id="consultasTab" class="ayuda-tab" type="button" role="tab" aria-selected="false" aria-controls="consultasPanel">Consultas generales</button>
+                </div>
+
+                <section id="contactoPanel" class="ayuda-panel" role="tabpanel" aria-labelledby="contactoTab">
+                    <h2>Contacto</h2>
+                    <p>Dejanos tu correo y tu consulta. El mensaje será enviado al equipo de Cerbero.</p>
+                    <form id="contactoForm" class="ayuda-form">
+                        <div class="ayuda-field">
+                            <label for="contactoEmail">Tu Gmail o correo electrónico</label>
+                            <input id="contactoEmail" name="email" type="email" maxlength="160" autocomplete="email" placeholder="nombre@gmail.com" required>
+                        </div>
+                        <div class="ayuda-field">
+                            <label for="contactoConsulta">Consulta</label>
+                            <textarea id="contactoConsulta" name="consulta" minlength="10" maxlength="2000" placeholder="Contanos en qué podemos ayudarte" required></textarea>
+                        </div>
+                        <div class="ayuda-honeypot" aria-hidden="true">
+                            <label for="contactoWebsite">No completar</label>
+                            <input id="contactoWebsite" name="website" type="text" tabindex="-1" autocomplete="off">
+                        </div>
+                        <button id="contactoEnviarBtn" class="ayuda-submit" type="submit">Enviar</button>
+                        <p id="contactoStatus" class="ayuda-status" aria-live="polite"></p>
+                    </form>
+                </section>
+
+                <section id="consultasPanel" class="ayuda-panel" role="tabpanel" aria-labelledby="consultasTab" hidden>
+                    <h2>Consultas generales</h2>
+                    <p>Preguntá cómo funciona Cerbero, sus secciones o el registro de incidencias.</p>
+                    <div id="chatMessages" class="chat-messages" aria-live="polite">
+                        <div class="chat-message bot">¡Hola! Puedo responder dudas generales acerca del sistema Cerbero. ¿Qué querés saber?</div>
+                    </div>
+                    <form id="chatForm" class="chat-form">
+                        <textarea id="chatPregunta" maxlength="1000" placeholder="Escribí tu consulta general" aria-label="Consulta para el asistente" required></textarea>
+                        <button id="chatEnviarBtn" class="ayuda-submit" type="submit">Enviar</button>
+                    </form>
+                    <p class="chat-help">Para datos personales, estados concretos o casos particulares, escribinos a cerberoSIGERU@gmail.com.</p>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="navigation.js?v=24"></script>
+    <script src="ayuda.js?v=1"></script>
+</body>
+</html>
